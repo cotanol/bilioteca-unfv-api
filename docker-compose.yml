@@ -1,0 +1,19 @@
+# --- Configuración de Docker Compose para el entorno de desarrollo ---
+# Este archivo levanta únicamente la base de datos Oracle.
+# La aplicación Spring Boot se ejecuta por separado desde el IDE.
+
+services:
+  db-biblioteca-unfv:
+    image: gvenzl/oracle-xe:21-slim-faststart
+    restart: always
+    ports:
+      - '1521:1521'
+    environment:
+      - ORACLE_PASSWORD=${DB_SYSTEM_PASSWORD}
+      - APP_USER=biblioteca_user
+      - APP_USER_PASSWORD=${DB_APP_PASSWORD}
+    container_name: biblioteca_unfv_db
+    volumes:
+      - biblioteca-unfv-data:/opt/oracle/oradata
+volumes:
+  biblioteca-unfv-data:
