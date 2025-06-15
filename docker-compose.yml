@@ -1,6 +1,5 @@
 # --- Configuración de Docker Compose para el entorno de desarrollo ---
 # Este archivo levanta únicamente la base de datos Oracle.
-# La aplicación Spring Boot se ejecuta por separado desde el IDE.
 
 services:
   db-biblioteca-unfv:
