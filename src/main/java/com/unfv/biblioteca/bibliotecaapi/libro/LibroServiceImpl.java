@@ -2,6 +2,7 @@ package com.unfv.biblioteca.bibliotecaapi.libro;
 
 import com.unfv.biblioteca.bibliotecaapi.libro.dto.*;
 import com.unfv.biblioteca.bibliotecaapi.libro.mapper.LibroMapper;
+import com.unfv.biblioteca.bibliotecaapi.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -36,12 +37,26 @@ public class LibroServiceImpl implements LibroService{
 
     @Override
     public LibroDTO update(Long id, ActualizarLibroDTO actualizarLibroDTO) {
+        // 1. Buscar el libro existente
         Libro libroActual = libroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Libro no encontrado con id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Libro no encontrado con id: " + id));
 
-        libroMapper.updateEntity(actualizarLibroDTO, libroActual);
+        // 2. Lógica de actualización parcial explícita
+        // Comprobar y actualizar el título si se proporcionó uno nuevo (Verificar los nulls)
+        if (actualizarLibroDTO.getTitulo() != null && !actualizarLibroDTO.getTitulo().isBlank()) {
+            libroActual.setTitulo(actualizarLibroDTO.getTitulo());
+        }
 
-        return libroMapper.toDto(libroRepository.save(libroActual));
+        // Comprobar y actualizar el autor si se proporcionó uno nuevo
+        if (actualizarLibroDTO.getAutor() != null && !actualizarLibroDTO.getAutor().isBlank()) {
+            libroActual.setAutor(actualizarLibroDTO.getAutor());
+        }
+
+        // 3. Guardar la entidad actualizada
+        Libro libroGuardado = libroRepository.save(libroActual);
+
+        // 4. Mapear la entidad final a DTO para la respuesta
+        return libroMapper.toDto(libroGuardado);
     }
 
     @Override
