@@ -11,6 +11,8 @@ import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.AutorRepository;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.CategoriaRepository;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.EditorialRepository;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.MaterialRepository;
+import com.unfv.biblioteca.bibliotecaapi.shared.exception.BusinessRuleException;
+import com.unfv.biblioteca.bibliotecaapi.shared.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,7 +50,7 @@ public class CatalogoService {
     @Transactional(readOnly = true)
     public MaterialDetalleDTO buscarMaterialPorId(Long id) {
         Material materialEntidad = materialRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Material con ID " + id + " no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Material con ID " + id + " no encontrado"));
 
         // Usamos el mapper para convertir la entidad a DTO
         return catalogoMapper.toMaterialDetalleDTO(materialEntidad);
@@ -57,11 +59,11 @@ public class CatalogoService {
     @Transactional
     public MaterialDetalleDTO crearMaterial(CrearMaterialRequestDTO request) {
         if (materialRepository.existsByIsbn(request.getIsbn())) {
-            throw new RuntimeException("El ISBN " + request.getIsbn() + " ya existe.");
+            throw new BusinessRuleException("El ISBN " + request.getIsbn() + " ya existe.");
         }
         // 1. Buscamos las entidades relacionadas usando los IDs del DTO
         Editorial editorial = editorialRepository.findById(request.getEditorialId())
-                .orElseThrow(() -> new RuntimeException("Editorial no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Editorial no encontrada"));
 
         Set<Autor> autores = new HashSet<>(autorRepository.findAllById(request.getAutoresIds()));
         Set<Categoria> categorias = new HashSet<>(categoriaRepository.findAllById(request.getCategoriasIds()));

@@ -7,6 +7,8 @@ import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.UsuarioDetal
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.mapper.UsuarioMapper;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.repository.TipoUsuarioRepository;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.repository.UsuarioRepository;
+import com.unfv.biblioteca.bibliotecaapi.shared.exception.BusinessRuleException;
+import com.unfv.biblioteca.bibliotecaapi.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,18 +27,18 @@ public class UsuarioService {
     public UsuarioDetalleDTO crearUsuario(CrearUsuarioRequestDTO request) {
         // 1. Validación de negocio simple
         if (usuarioRepository.existsByDni(request.getDni())) {
-            throw new IllegalStateException("El DNI ya está registrado.");
+            throw new BusinessRuleException("El DNI ya está registrado.");
         }
         if (usuarioRepository.existsByCodigoUniversitario(request.getCodigoUniversitario())) {
-            throw new IllegalStateException("El código universitario ya está registrado.");
+            throw new BusinessRuleException("El código universitario ya está registrado.");
         }
         if (usuarioRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalStateException("El email ya está registrado.");
+            throw new BusinessRuleException("El email ya está registrado.");
         }
 
         // 2. Buscamos el tipo de usuario
         TipoUsuario tipoUsuario = tipoUsuarioRepository.findById(request.getTipoUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Tipo de usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Tipo de usuario no encontrado"));
 
         // 3. Creamos la nueva entidad Usuario
         Usuario nuevoUsuario = new Usuario();
@@ -68,7 +70,7 @@ public class UsuarioService {
     public UsuarioDetalleDTO buscarUsuarioPorId(Long id) {
         return usuarioRepository.findById(id)
                 .map(usuarioMapper::toUsuarioDetalleDTO)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
     }
 
 }

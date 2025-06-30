@@ -37,7 +37,7 @@ public class UsuarioController {
         // Authentication authentication -> Inyectado por Spring Security
         // Long usuarioLogueadoId = ((UserDetailsPersonalizado) authentication.getPrincipal()).getId();
 
-        // Para tu demo de mañana, podemos usar un ID fijo para probar.
+        // Id fijo para testear
         Long usuarioLogueadoId = 1L; // <<-- VALOR FIJO SOLO PARA PRUEBAS
 
         UsuarioDetalleDTO perfil = usuarioService.buscarUsuarioPorId(usuarioLogueadoId);

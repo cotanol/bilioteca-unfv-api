@@ -1,5 +1,6 @@
 package com.unfv.biblioteca.bibliotecaapi.catalogo.dto.request;
 
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import java.util.Set;
 
@@ -15,14 +16,22 @@ public class ActualizarMaterialRequestDTO {
     private String titulo;
 
     private String subtitulo;
+
+    @Positive(message = "El ID de la editorial debe ser un número positivo")
     private Long editorialId;
+
     private String edicion;
+
     private Integer anioPublicacion;
+
     private Integer numeroPaginas;
+
     private String tipoMaterial;
+
     private String resumen;
 
     // Podríamos querer permitir actualizar las listas completas
-    private Set<Long> autoresIds;
-    private Set<Long> categoriasIds;
+    private Set<@Positive Long> autoresIds;
+
+    private Set<@Positive Long> categoriasIds;
 }

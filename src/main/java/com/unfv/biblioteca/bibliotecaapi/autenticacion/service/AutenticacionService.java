@@ -4,6 +4,7 @@ import com.unfv.biblioteca.bibliotecaapi.autenticacion.domain.Usuario;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.LoginRequestDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.AuthResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.repository.UsuarioRepository;
+import com.unfv.biblioteca.bibliotecaapi.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +20,11 @@ public class AutenticacionService {
 
         // 1. Buscamos al usuario por su código
         Usuario usuario = usuarioRepository.findByCodigoUniversitario(request.getCodigoUniversitario())
-                .orElseThrow(() -> new RuntimeException("Credenciales incorrectas"));
+                .orElseThrow(() -> new ResourceNotFoundException("Credenciales incorrectas"));
 
         // 2. Comparamos la contraseña en texto plano (INSEGURO, SOLO PARA DEMO)
         if (!usuario.getPasswordHash().equals(request.getPassword())) {
-            throw new RuntimeException("Credenciales incorrectas");
+            throw new ResourceNotFoundException("Credenciales incorrectas");
         }
 
         // 3. Si las credenciales "coinciden", generamos un token falso

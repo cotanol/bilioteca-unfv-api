@@ -44,7 +44,7 @@ public class PrestamoController {
     /*
     @PostMapping("/{id}/devolucion")
     public ResponseEntity<?> registrarDevolucion(@PathVariable Long id) {
-        prestamoService.registrarDevolucion(id); // Este método devolvería void o el DTO actualizado
+        prestamoService.registrarDevolucion(id); // Este metodo devolvería void o el DTO actualizado
         return ResponseEntity.ok().build(); // Devuelve un 200 OK sin cuerpo
     }
     */

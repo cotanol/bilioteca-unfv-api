@@ -9,6 +9,8 @@ import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.request.CrearPrestamoRe
 import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.PrestamoDetalleDTO;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.mapper.CirculacionMapper;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.repository.PrestamoRepository;
+import com.unfv.biblioteca.bibliotecaapi.shared.exception.BusinessRuleException;
+import com.unfv.biblioteca.bibliotecaapi.shared.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,27 +56,27 @@ public class PrestamoService {
     public PrestamoDetalleDTO crearPrestamo(CrearPrestamoRequestDTO request) {
         // 1. Buscamos las entidades principales a partir de los IDs del DTO
         Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         Ejemplar ejemplar = exemplarRepository.findById(request.getEjemplarId())
-                .orElseThrow(() -> new RuntimeException("Ejemplar no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ejemplar no encontrado"));
 
         // === 2. APLICAMOS LAS REGLAS DE NEGOCIO ===
         // Regla 1: El ejemplar debe estar disponible
         if (!"Disponible".equalsIgnoreCase(ejemplar.getEstado())) {
-            throw new IllegalStateException("El ejemplar con código " + ejemplar.getCodigoBarras() + " no está disponible.");
+            throw new BusinessRuleException("El ejemplar con código " + ejemplar.getCodigoBarras() + " no está disponible.");
         }
 
         // Regla 2: El usuario debe estar activo
         if (!"Activo".equalsIgnoreCase(usuario.getEstado())) {
-            throw new IllegalStateException("El usuario " + usuario.getNombres() + " no está activo.");
+            throw new BusinessRuleException("El usuario " + usuario.getNombres() + " no está activo.");
         }
 
         // Regla 3: El usuario no debe exceder su límite de préstamos
-        // (Necesitaremos un nuevo método en PrestamoRepository)
+        // (Necesitaremos un nuevo metodo en PrestamoRepository)
         long prestamosActivos = prestamoRepository.countByUsuarioIdAndEstado(usuario.getId(), "Activo");
         if (prestamosActivos >= usuario.getTipoUsuario().getLimitePrestamos()) {
-            throw new IllegalStateException("El usuario ha alcanzado su límite de préstamos.");
+            throw new BusinessRuleException("El usuario ha alcanzado su límite de préstamos.");
         }
 
         // (Opcional) Regla 4: Verificar que el usuario no tenga multas pendientes
@@ -83,7 +85,7 @@ public class PrestamoService {
         // === 3. SI TODAS LAS REGLAS PASAN, PROCEDEMOS A CREAR ===
 
         // Actualizamos el estado del ejemplar
-        ejemplar.setEstado("En Préstamo");
+        ejemplar.setEstado("En Prestamo");
         exemplarRepository.save(ejemplar);
 
         // Creamos la nueva entidad Prestamo
