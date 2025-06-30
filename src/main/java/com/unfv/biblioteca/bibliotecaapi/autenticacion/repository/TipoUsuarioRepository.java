@@ -1,4 +1,9 @@
 package com.unfv.biblioteca.bibliotecaapi.autenticacion.repository;
 
-public class TipoUsuarioRepository {
+import com.unfv.biblioteca.bibliotecaapi.autenticacion.domain.TipoUsuario;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface TipoUsuarioRepository extends JpaRepository<TipoUsuario, Long> {
 }

@@ -7,6 +7,11 @@ plugins {
 group = 'com.unfv.biblioteca'
 version = '0.0.1-SNAPSHOT'
 
+ext {
+    mapstructVersion = "1.5.5.Final"
+    lombokMapstructBindingVersion = "0.2.0"
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(22)
@@ -32,6 +37,13 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // === AÑADIR ESTAS DEPENDENCIAS PARA MAPSTRUCT ===
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+    // Esta dependencia es el "puente" para que Lombok y MapStruct funcionen bien juntos
+    annotationProcessor "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
 }
 
 tasks.named('test') {
