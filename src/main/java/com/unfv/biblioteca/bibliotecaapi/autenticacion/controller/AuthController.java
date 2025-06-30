@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("git/auth") // URL base para todo lo relacionado con autenticación
+@RequestMapping("/auth") // URL base para todo lo relacionado con autenticación
 @RequiredArgsConstructor
 public class AuthController {
 
