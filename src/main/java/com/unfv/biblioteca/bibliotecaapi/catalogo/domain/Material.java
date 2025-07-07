@@ -57,6 +57,9 @@ public class Material {
     @Lob
     private String resumen;
 
+    @Column(name = "url_imagen", length = 1000)
+    private String urlImagen;
+
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "materiales_autores",

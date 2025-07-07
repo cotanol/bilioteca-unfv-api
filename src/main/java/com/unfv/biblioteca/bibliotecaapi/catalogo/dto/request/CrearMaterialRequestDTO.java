@@ -33,6 +33,8 @@ public class CrearMaterialRequestDTO {
 
     private String resumen;
 
+    private String urlImagen;
+
     @NotEmpty(message = "Debe proporcionar al menos un autor")
     private Set<@NotNull @Positive Long> autoresIds;
 

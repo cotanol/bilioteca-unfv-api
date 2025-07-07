@@ -19,6 +19,7 @@ public class MaterialDetalleDTO {
     private Integer numeroPaginas;
     private String tipoMaterial;
     private String resumen;
+    private String urlImagen;
     private Set<String> autores;
     private Set<String> categorias;
 }

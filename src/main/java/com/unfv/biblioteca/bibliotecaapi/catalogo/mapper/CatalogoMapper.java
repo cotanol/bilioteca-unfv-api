@@ -22,6 +22,7 @@ public interface CatalogoMapper {
     @Mapping(source = "editorial.nombre", target = "editorial")
     @Mapping(source = "autores", target = "autores", qualifiedByName = "autoresToNombres")
     @Mapping(source = "categorias", target = "categorias", qualifiedByName = "categoriasToNombres")
+    @Mapping(source = "urlImagen", target = "urlImagen")
     MaterialDetalleDTO toMaterialDetalleDTO(Material material);
 
     EjemplarDetalleDTO toEjemplarDetalleDTO(Ejemplar ejemplar);
@@ -42,6 +43,7 @@ public interface CatalogoMapper {
     @Mapping(target = "editorial", ignore = true)
     @Mapping(target = "autores", ignore = true)
     @Mapping(target = "categorias", ignore = true)
+    @Mapping(source = "urlImagen", target = "urlImagen")
     Material toMaterial(CrearMaterialRequestDTO dto);
 
     /**
