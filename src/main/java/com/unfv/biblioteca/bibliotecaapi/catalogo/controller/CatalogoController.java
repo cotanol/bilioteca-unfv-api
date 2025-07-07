@@ -28,6 +28,8 @@ public class CatalogoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(materialCreado);
     }
 
+
+
     /**
      * Endpoint para buscar un material por su ID.
      * Se accede a través de GET /api/catalogo/materiales/{id}

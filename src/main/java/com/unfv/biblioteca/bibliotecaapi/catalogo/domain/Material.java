@@ -89,6 +89,7 @@ public class Material {
         this.categorias.add(categoria);
     }
 
+
     public void removeCategoria(Categoria categoria) {
         this.categorias.remove(categoria);
     }

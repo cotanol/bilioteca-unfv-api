@@ -46,6 +46,7 @@ public interface CatalogoMapper {
     @Mapping(source = "urlImagen", target = "urlImagen")
     Material toMaterial(CrearMaterialRequestDTO dto);
 
+
     /**
      * Actualiza una entidad Material existente a partir de un DTO de actualización.
      */

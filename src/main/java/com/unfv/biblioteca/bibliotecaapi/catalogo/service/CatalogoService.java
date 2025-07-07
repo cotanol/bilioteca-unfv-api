@@ -44,6 +44,7 @@ public class CatalogoService {
         this.catalogoMapper = catalogoMapper;
     }
 
+
     // Metodos para logica de negocio del catálogo de materiales
     // Por ejemplo, buscar materiales, autores, categorías, editoriales, etc.
 

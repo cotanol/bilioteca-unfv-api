@@ -20,6 +20,8 @@ public class ActualizarMaterialRequestDTO {
     @Positive(message = "El ID de la editorial debe ser un número positivo")
     private Long editorialId;
 
+    private String urlImagen;
+
     private String edicion;
 
     private Integer anioPublicacion;
