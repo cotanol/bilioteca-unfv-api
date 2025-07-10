@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UbicacionDetalleDTO {
+public class UbicacionResponseDTO {
 
     private Long id;
     private String facultad;

@@ -77,12 +77,39 @@ public interface CatalogoMapper {
 
 
     // =================================================================
-    // MAPPERS PARA OTROS DOMINIOS
+    // MAPPERS PARA UBICACION
     // =================================================================
 
-    EjemplarDetalleDTO toEjemplarDetalleDTO(Ejemplar ejemplar);
+    UbicacionResponseDTO toUbicacionResponseDTO(Ubicacion ubicacion);
 
-    UbicacionDetalleDTO toUbicacionDetalleDTO(Ubicacion ubicacion);
+    @Mapping(target = "id", ignore = true)
+    Ubicacion toUbicacion(CrearUbicacionRequestDTO dto);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    void updateUbicacionFromDto(ActualizarUbicacionRequestDTO dto, @MappingTarget Ubicacion ubicacion);
+
+    // =================================================================
+    // MAPPERS PARA EJEMPLAR
+    // =================================================================
+
+    @Mapping(source = "material.id", target = "materialId")
+    @Mapping(source = "material.titulo", target = "materialTitulo")
+    @Mapping(source = "ubicacion.id", target = "ubicacionId")
+    @Mapping(source = "ubicacion.bibliotecaNombre", target = "ubicacionNombre")
+    EjemplarResponseDTO toEjemplarResponseDTO(Ejemplar ejemplar);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "material", ignore = true)
+    @Mapping(target = "ubicacion", ignore = true)
+    Ejemplar toEjemplar(CrearEjemplarRequestDTO dto);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "material", ignore = true)
+    @Mapping(target = "ubicacion", ignore = true)
+    @Mapping(target = "codigoBarras", ignore = true)
+    void updateEjemplarFromDto(ActualizarEjemplarRequestDTO dto, @MappingTarget Ejemplar ejemplar);
 
 
     // =================================================================

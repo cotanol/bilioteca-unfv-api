@@ -11,12 +11,14 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EjemplarDetalleDTO {
+public class EjemplarResponseDTO {
 
     private Long id;
     private String codigoBarras;
     private String estado;
     private LocalDate fechaAdquisicion;
-    private MaterialDetalleDTO material;
-    private UbicacionResponseDTO ubicacion;
+    private Long materialId;
+    private String materialTitulo;
+    private Long ubicacionId;
+    private String ubicacionNombre;
 }

@@ -4,6 +4,8 @@ import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.request.*;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.AutorResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.CategoriaResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.EditorialResponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.EjemplarResponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.UbicacionResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.MaterialDetalleDTO;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.service.CatalogoService;
 import jakarta.validation.Valid;
@@ -127,6 +129,68 @@ public class CatalogoController {
     @DeleteMapping("/editoriales/{id}")
     public ResponseEntity<Void> eliminarEditorial(@PathVariable Long id) {
         catalogoService.eliminarEditorial(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // =================================================================
+    // ENDPOINTS PARA UBICACIONES
+    // =================================================================
+
+    @GetMapping("/ubicaciones")
+    public ResponseEntity<List<UbicacionResponseDTO>> listarUbicaciones() {
+        return ResponseEntity.ok(catalogoService.findAllUbicaciones());
+    }
+
+    @GetMapping("/ubicaciones/{id}")
+    public ResponseEntity<UbicacionResponseDTO> buscarUbicacionPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(catalogoService.findUbicacionById(id));
+    }
+
+    @PostMapping("/ubicaciones")
+    public ResponseEntity<UbicacionResponseDTO> crearUbicacion(@Valid @RequestBody CrearUbicacionRequestDTO request) {
+        UbicacionResponseDTO ubicacionCreada = catalogoService.crearUbicacion(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ubicacionCreada);
+    }
+
+    @PutMapping("/ubicaciones/{id}")
+    public ResponseEntity<UbicacionResponseDTO> actualizarUbicacion(@PathVariable Long id, @Valid @RequestBody ActualizarUbicacionRequestDTO request) {
+        return ResponseEntity.ok(catalogoService.actualizarUbicacion(id, request));
+    }
+
+    @DeleteMapping("/ubicaciones/{id}")
+    public ResponseEntity<Void> eliminarUbicacion(@PathVariable Long id) {
+        catalogoService.eliminarUbicacion(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // =================================================================
+    // ENDPOINTS PARA EJEMPLARES
+    // =================================================================
+
+    @GetMapping("/ejemplares")
+    public ResponseEntity<List<EjemplarResponseDTO>> listarEjemplares() {
+        return ResponseEntity.ok(catalogoService.findAllEjemplares());
+    }
+
+    @GetMapping("/ejemplares/{id}")
+    public ResponseEntity<EjemplarResponseDTO> buscarEjemplarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(catalogoService.findEjemplarById(id));
+    }
+
+    @PostMapping("/ejemplares")
+    public ResponseEntity<EjemplarResponseDTO> crearEjemplar(@Valid @RequestBody CrearEjemplarRequestDTO request) {
+        EjemplarResponseDTO ejemplarCreado = catalogoService.crearEjemplar(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ejemplarCreado);
+    }
+
+    @PutMapping("/ejemplares/{id}")
+    public ResponseEntity<EjemplarResponseDTO> actualizarEjemplar(@PathVariable Long id, @Valid @RequestBody ActualizarEjemplarRequestDTO request) {
+        return ResponseEntity.ok(catalogoService.actualizarEjemplar(id, request));
+    }
+
+    @DeleteMapping("/ejemplares/{id}")
+    public ResponseEntity<Void> eliminarEjemplar(@PathVariable Long id) {
+        catalogoService.eliminarEjemplar(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -3,16 +3,22 @@ package com.unfv.biblioteca.bibliotecaapi.catalogo.service;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Autor;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Categoria;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Editorial;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Ejemplar;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Ubicacion;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Material;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.request.*;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.AutorResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.CategoriaResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.EditorialResponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.EjemplarResponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.UbicacionResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.MaterialDetalleDTO;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.mapper.CatalogoMapper;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.AutorRepository;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.CategoriaRepository;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.EditorialRepository;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.EjemplarRepository;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.UbicacionRepository;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.MaterialRepository;
 import com.unfv.biblioteca.bibliotecaapi.shared.exception.BusinessRuleException;
 import com.unfv.biblioteca.bibliotecaapi.shared.exception.ResourceNotFoundException;
@@ -33,6 +39,8 @@ public class CatalogoService {
     private final AutorRepository autorRepository;
     private final CategoriaRepository categoriaRepository;
     private final EditorialRepository editorialRepository;
+    private final UbicacionRepository ubicacionRepository;
+    private final EjemplarRepository ejemplarRepository;
     private final CatalogoMapper catalogoMapper;
 
     // =================================================================
@@ -208,5 +216,109 @@ public class CatalogoService {
             throw new BusinessRuleException("No se puede eliminar la editorial porque está asociada a uno o más materiales.");
         }
         editorialRepository.deleteById(id);
+    }
+
+    // =================================================================
+    // MÉTODOS PARA UBICACION
+    // =================================================================
+
+    @Transactional(readOnly = true)
+    public List<UbicacionResponseDTO> findAllUbicaciones() {
+        return ubicacionRepository.findAll().stream()
+                .map(catalogoMapper::toUbicacionResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public UbicacionResponseDTO findUbicacionById(Long id) {
+        Ubicacion ubicacion = ubicacionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ubicación no encontrada con ID: " + id));
+        return catalogoMapper.toUbicacionResponseDTO(ubicacion);
+    }
+
+    @Transactional
+    public UbicacionResponseDTO crearUbicacion(CrearUbicacionRequestDTO request) {
+        Ubicacion nuevaUbicacion = catalogoMapper.toUbicacion(request);
+        Ubicacion ubicacionGuardada = ubicacionRepository.save(nuevaUbicacion);
+        return catalogoMapper.toUbicacionResponseDTO(ubicacionGuardada);
+    }
+
+    @Transactional
+    public UbicacionResponseDTO actualizarUbicacion(Long id, ActualizarUbicacionRequestDTO request) {
+        Ubicacion ubicacionExistente = ubicacionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ubicación no encontrada con ID: " + id));
+        catalogoMapper.updateUbicacionFromDto(request, ubicacionExistente);
+        Ubicacion ubicacionActualizada = ubicacionRepository.save(ubicacionExistente);
+        return catalogoMapper.toUbicacionResponseDTO(ubicacionActualizada);
+    }
+
+    @Transactional
+    public void eliminarUbicacion(Long id) {
+        if (!ubicacionRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Ubicación no encontrada con ID: " + id);
+        }
+        if (ejemplarRepository.existsByUbicacionId(id)) {
+            throw new BusinessRuleException("No se puede eliminar la ubicación porque está asociada a uno o más ejemplares.");
+        }
+        ubicacionRepository.deleteById(id);
+    }
+
+    // =================================================================
+    // MÉTODOS PARA EJEMPLAR
+    // =================================================================
+
+    @Transactional(readOnly = true)
+    public List<EjemplarResponseDTO> findAllEjemplares() {
+        return ejemplarRepository.findAll().stream()
+                .map(catalogoMapper::toEjemplarResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public EjemplarResponseDTO findEjemplarById(Long id) {
+        Ejemplar ejemplar = ejemplarRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ejemplar no encontrado con ID: " + id));
+        return catalogoMapper.toEjemplarResponseDTO(ejemplar);
+    }
+
+    @Transactional
+    public EjemplarResponseDTO crearEjemplar(CrearEjemplarRequestDTO request) {
+        if (ejemplarRepository.existsByCodigoBarras(request.getCodigoBarras())) {
+            throw new BusinessRuleException("El código de barras '" + request.getCodigoBarras() + "' ya existe.");
+        }
+        Material material = materialRepository.findById(request.getMaterialId())
+                .orElseThrow(() -> new ResourceNotFoundException("Material no encontrado con ID: " + request.getMaterialId()));
+        Ubicacion ubicacion = ubicacionRepository.findById(request.getUbicacionId())
+                .orElseThrow(() -> new ResourceNotFoundException("Ubicación no encontrada con ID: " + request.getUbicacionId()));
+
+        Ejemplar nuevoEjemplar = catalogoMapper.toEjemplar(request);
+        nuevoEjemplar.setMaterial(material);
+        nuevoEjemplar.setUbicacion(ubicacion);
+
+        Ejemplar ejemplarGuardado = ejemplarRepository.save(nuevoEjemplar);
+        return catalogoMapper.toEjemplarResponseDTO(ejemplarGuardado);
+    }
+
+    @Transactional
+    public EjemplarResponseDTO actualizarEjemplar(Long id, ActualizarEjemplarRequestDTO request) {
+        Ejemplar ejemplarExistente = ejemplarRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ejemplar no encontrado con ID: " + id));
+        Ubicacion ubicacion = ubicacionRepository.findById(request.getUbicacionId())
+                .orElseThrow(() -> new ResourceNotFoundException("Ubicación no encontrada con ID: " + request.getUbicacionId()));
+
+        catalogoMapper.updateEjemplarFromDto(request, ejemplarExistente);
+        ejemplarExistente.setUbicacion(ubicacion);
+
+        Ejemplar ejemplarActualizado = ejemplarRepository.save(ejemplarExistente);
+        return catalogoMapper.toEjemplarResponseDTO(ejemplarActualizado);
+    }
+
+    @Transactional
+    public void eliminarEjemplar(Long id) {
+        if (!ejemplarRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Ejemplar no encontrado con ID: " + id);
+        }
+        // Aquí se podrían agregar reglas de negocio, como no poder eliminar si está en préstamo.
+        ejemplarRepository.deleteById(id);
     }
 }
