@@ -1,11 +1,8 @@
 package com.unfv.biblioteca.bibliotecaapi.catalogo.mapper;
 
 import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.*;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.request.ActualizarMaterialRequestDTO;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.request.CrearMaterialRequestDTO;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.EjemplarDetalleDTO;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.MaterialDetalleDTO;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.UbicacionDetalleDTO;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.request.*;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.*;
 import org.mapstruct.*;
 
 import java.util.Collections;
@@ -16,7 +13,7 @@ import java.util.stream.Collectors;
 public interface CatalogoMapper {
 
     // =================================================================
-    // MÉTODOS DE ENTIDAD A DTO (PARA RESPUESTAS DE LA API)
+    // MAPPERS PARA MATERIAL
     // =================================================================
 
     @Mapping(source = "editorial.nombre", target = "editorial")
@@ -25,20 +22,6 @@ public interface CatalogoMapper {
     @Mapping(source = "urlImagen", target = "urlImagen")
     MaterialDetalleDTO toMaterialDetalleDTO(Material material);
 
-    EjemplarDetalleDTO toEjemplarDetalleDTO(Ejemplar ejemplar);
-
-    UbicacionDetalleDTO toUbicacionDetalleDTO(Ubicacion ubicacion);
-
-
-    // =================================================================
-    // MÉTODOS DE DTO A ENTIDAD (PARA PETICIONES A LA API)
-    // =================================================================
-
-    /**
-     * Convierte un DTO de creación a una nueva entidad Material.
-     * Ignoramos el ID (porque es nuevo) y las relaciones, ya que
-     * el Servicio se encargará de buscarlas por ID y asignarlas.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "editorial", ignore = true)
     @Mapping(target = "autores", ignore = true)
@@ -46,16 +29,60 @@ public interface CatalogoMapper {
     @Mapping(source = "urlImagen", target = "urlImagen")
     Material toMaterial(CrearMaterialRequestDTO dto);
 
-
-    /**
-     * Actualiza una entidad Material existente a partir de un DTO de actualización.
-     */
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "editorial", ignore = true)
     @Mapping(target = "autores", ignore = true)
     @Mapping(target = "categorias", ignore = true)
     void updateMaterialFromDto(ActualizarMaterialRequestDTO dto, @MappingTarget Material material);
+
+    // =================================================================
+    // MAPPERS PARA AUTOR
+    // =================================================================
+
+    AutorResponseDTO toAutorResponseDTO(Autor autor);
+
+    @Mapping(target = "id", ignore = true)
+    Autor toAutor(CrearAutorRequestDTO dto);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    void updateAutorFromDto(ActualizarAutorRequestDTO dto, @MappingTarget Autor autor);
+
+    // =================================================================
+    // MAPPERS PARA CATEGORIA
+    // =================================================================
+
+    CategoriaResponseDTO toCategoriaResponseDTO(Categoria categoria);
+
+    @Mapping(target = "id", ignore = true)
+    Categoria toCategoria(CrearCategoriaRequestDTO dto);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    void updateCategoriaFromDto(ActualizarCategoriaRequestDTO dto, @MappingTarget Categoria categoria);
+
+    // =================================================================
+    // MAPPERS PARA EDITORIAL
+    // =================================================================
+
+    EditorialResponseDTO toEditorialResponseDTO(Editorial editorial);
+
+    @Mapping(target = "id", ignore = true)
+    Editorial toEditorial(CrearEditorialRequestDTO dto);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    void updateEditorialFromDto(ActualizarEditorialRequestDTO dto, @MappingTarget Editorial editorial);
+
+
+    // =================================================================
+    // MAPPERS PARA OTROS DOMINIOS
+    // =================================================================
+
+    EjemplarDetalleDTO toEjemplarDetalleDTO(Ejemplar ejemplar);
+
+    UbicacionDetalleDTO toUbicacionDetalleDTO(Ubicacion ubicacion);
 
 
     // =================================================================

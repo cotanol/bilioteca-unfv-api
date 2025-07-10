@@ -54,6 +54,7 @@ public class Material {
     @Column(name = "tipo_material", nullable = false, length = 50)
     private String tipoMaterial;
 
+
     @Lob
     private String resumen;
 

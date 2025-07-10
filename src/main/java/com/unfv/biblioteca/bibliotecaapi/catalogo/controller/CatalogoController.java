@@ -1,6 +1,9 @@
 package com.unfv.biblioteca.bibliotecaapi.catalogo.controller;
 
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.request.CrearMaterialRequestDTO;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.request.*;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.AutorResponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.CategoriaResponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.EditorialResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.MaterialDetalleDTO;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.service.CatalogoService;
 import jakarta.validation.Valid;
@@ -9,43 +12,121 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RestController // 1. Combina @Controller y @ResponseBody. Indica que devolverá JSON.
-@RequestMapping("/catalogo") // 2. Define una URL base para todos los endpoints de este controlador.
-@RequiredArgsConstructor // 3. Lombok crea el constructor para inyectar las dependencias final.
-public class CatalogoController {
-    private final CatalogoService catalogoService; // 4. Inyectamos nuestro servicio.
+import java.util.List;
 
-    /**
-     * Endpoint para crear un nuevo material.
-     * Se accede a través de POST /api/catalogo/materiales
-     */
+@RestController
+@RequestMapping("/catalogo")
+@RequiredArgsConstructor
+public class CatalogoController {
+
+    private final CatalogoService catalogoService;
+
+    // =================================================================
+    // ENDPOINTS PARA MATERIALES
+    // =================================================================
+
     @PostMapping("/materiales")
     public ResponseEntity<MaterialDetalleDTO> crearMaterial(@Valid @RequestBody CrearMaterialRequestDTO request) {
-        // 5. Llama al servicio para ejecutar la lógica de negocio
         MaterialDetalleDTO materialCreado = catalogoService.crearMaterial(request);
-
-        // 6. Devuelve el DTO de respuesta con un código de estado 201 Created
         return ResponseEntity.status(HttpStatus.CREATED).body(materialCreado);
     }
 
-
-
-    /**
-     * Endpoint para buscar un material por su ID.
-     * Se accede a través de GET /api/catalogo/materiales/{id}
-     */
     @GetMapping("/materiales/{id}")
     public ResponseEntity<MaterialDetalleDTO> buscarMaterialPorId(@PathVariable Long id) {
-        // 7. Llama al servicio para buscar el material
         MaterialDetalleDTO materialEncontrado = catalogoService.buscarMaterialPorId(id);
-
-        // 8. Devuelve el DTO de respuesta con un código de estado 200 OK
         return ResponseEntity.ok(materialEncontrado);
     }
 
-    // --- Aquí irían otros endpoints para el catálogo ---
+    // =================================================================
+    // ENDPOINTS PARA AUTORES
+    // =================================================================
 
-    // GET /api/catalogo/autores - Para listar todos los autores
-    // GET /api/catalogo/categorias - Para listar todas las categorías
-    // PUT /api/catalogo/materiales/{id} - Para actualizar un material
+    @GetMapping("/autores")
+    public ResponseEntity<List<AutorResponseDTO>> listarAutores() {
+        return ResponseEntity.ok(catalogoService.findAllAutores());
+    }
+
+    @GetMapping("/autores/{id}")
+    public ResponseEntity<AutorResponseDTO> buscarAutorPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(catalogoService.findAutorById(id));
+    }
+
+    @PostMapping("/autores")
+    public ResponseEntity<AutorResponseDTO> crearAutor(@Valid @RequestBody CrearAutorRequestDTO request) {
+        AutorResponseDTO autorCreado = catalogoService.crearAutor(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(autorCreado);
+    }
+
+    @PutMapping("/autores/{id}")
+    public ResponseEntity<AutorResponseDTO> actualizarAutor(@PathVariable Long id, @Valid @RequestBody ActualizarAutorRequestDTO request) {
+        return ResponseEntity.ok(catalogoService.actualizarAutor(id, request));
+    }
+
+    @DeleteMapping("/autores/{id}")
+    public ResponseEntity<Void> eliminarAutor(@PathVariable Long id) {
+        catalogoService.eliminarAutor(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // =================================================================
+    // ENDPOINTS PARA CATEGORÍAS
+    // =================================================================
+
+    @GetMapping("/categorias")
+    public ResponseEntity<List<CategoriaResponseDTO>> listarCategorias() {
+        return ResponseEntity.ok(catalogoService.findAllCategorias());
+    }
+
+    @GetMapping("/categorias/{id}")
+    public ResponseEntity<CategoriaResponseDTO> buscarCategoriaPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(catalogoService.findCategoriaById(id));
+    }
+
+    @PostMapping("/categorias")
+    public ResponseEntity<CategoriaResponseDTO> crearCategoria(@Valid @RequestBody CrearCategoriaRequestDTO request) {
+        CategoriaResponseDTO categoriaCreada = catalogoService.crearCategoria(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoriaCreada);
+    }
+
+    @PutMapping("/categorias/{id}")
+    public ResponseEntity<CategoriaResponseDTO> actualizarCategoria(@PathVariable Long id, @Valid @RequestBody ActualizarCategoriaRequestDTO request) {
+        return ResponseEntity.ok(catalogoService.actualizarCategoria(id, request));
+    }
+
+    @DeleteMapping("/categorias/{id}")
+    public ResponseEntity<Void> eliminarCategoria(@PathVariable Long id) {
+        catalogoService.eliminarCategoria(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // =================================================================
+    // ENDPOINTS PARA EDITORIALES
+    // =================================================================
+
+    @GetMapping("/editoriales")
+    public ResponseEntity<List<EditorialResponseDTO>> listarEditoriales() {
+        return ResponseEntity.ok(catalogoService.findAllEditoriales());
+    }
+
+    @GetMapping("/editoriales/{id}")
+    public ResponseEntity<EditorialResponseDTO> buscarEditorialPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(catalogoService.findEditorialById(id));
+    }
+
+    @PostMapping("/editoriales")
+    public ResponseEntity<EditorialResponseDTO> crearEditorial(@Valid @RequestBody CrearEditorialRequestDTO request) {
+        EditorialResponseDTO editorialCreada = catalogoService.crearEditorial(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(editorialCreada);
+    }
+
+    @PutMapping("/editoriales/{id}")
+    public ResponseEntity<EditorialResponseDTO> actualizarEditorial(@PathVariable Long id, @Valid @RequestBody ActualizarEditorialRequestDTO request) {
+        return ResponseEntity.ok(catalogoService.actualizarEditorial(id, request));
+    }
+
+    @DeleteMapping("/editoriales/{id}")
+    public ResponseEntity<Void> eliminarEditorial(@PathVariable Long id) {
+        catalogoService.eliminarEditorial(id);
+        return ResponseEntity.noContent().build();
+    }
 }

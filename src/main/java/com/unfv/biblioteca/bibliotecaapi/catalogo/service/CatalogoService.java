@@ -4,7 +4,10 @@ import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Autor;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Categoria;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Editorial;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Material;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.request.CrearMaterialRequestDTO;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.request.*;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.AutorResponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.CategoriaResponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.EditorialResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.MaterialDetalleDTO;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.mapper.CatalogoMapper;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.AutorRepository;
@@ -13,74 +16,197 @@ import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.EditorialRepository
 import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.MaterialRepository;
 import com.unfv.biblioteca.bibliotecaapi.shared.exception.BusinessRuleException;
 import com.unfv.biblioteca.bibliotecaapi.shared.exception.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CatalogoService {
 
-    // Declaramos las dependencias como finales (inmutables)
     private final MaterialRepository materialRepository;
     private final AutorRepository autorRepository;
     private final CategoriaRepository categoriaRepository;
     private final EditorialRepository editorialRepository;
     private final CatalogoMapper catalogoMapper;
 
-    // Constructor para inyectar las dependencias
-    @Autowired
-    public CatalogoService(MaterialRepository materialRepository,
-                           AutorRepository autorRepository,
-                           CategoriaRepository categoriaRepository,
-                           EditorialRepository editorialRepository,
-                           CatalogoMapper catalogoMapper) {
-        this.materialRepository = materialRepository;
-        this.autorRepository = autorRepository;
-        this.categoriaRepository = categoriaRepository;
-        this.editorialRepository = editorialRepository;
-        this.catalogoMapper = catalogoMapper;
-    }
-
-
-    // Metodos para logica de negocio del catálogo de materiales
-    // Por ejemplo, buscar materiales, autores, categorías, editoriales, etc.
+    // =================================================================
+    // MÉTODOS PARA MATERIAL
+    // =================================================================
 
     @Transactional(readOnly = true)
     public MaterialDetalleDTO buscarMaterialPorId(Long id) {
         Material materialEntidad = materialRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Material con ID " + id + " no encontrado"));
-
-        // Usamos el mapper para convertir la entidad a DTO
         return catalogoMapper.toMaterialDetalleDTO(materialEntidad);
     }
 
     @Transactional
     public MaterialDetalleDTO crearMaterial(CrearMaterialRequestDTO request) {
-        if (materialRepository.existsByIsbn(request.getIsbn())) {
+        if (request.getIsbn() != null && materialRepository.existsByIsbn(request.getIsbn())) {
             throw new BusinessRuleException("El ISBN " + request.getIsbn() + " ya existe.");
         }
-        // 1. Buscamos las entidades relacionadas usando los IDs del DTO
         Editorial editorial = editorialRepository.findById(request.getEditorialId())
-                .orElseThrow(() -> new ResourceNotFoundException("Editorial no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Editorial no encontrada con ID: " + request.getEditorialId()));
 
         Set<Autor> autores = new HashSet<>(autorRepository.findAllById(request.getAutoresIds()));
         Set<Categoria> categorias = new HashSet<>(categoriaRepository.findAllById(request.getCategoriasIds()));
 
-        // 2. El Mapper convierte los datos simples del DTO a la entidad
         Material nuevoMaterial = catalogoMapper.toMaterial(request);
-
-        // 3. "Enriquecemos" la entidad con las relaciones que ya buscamos
         nuevoMaterial.setEditorial(editorial);
         nuevoMaterial.setAutores(autores);
         nuevoMaterial.setCategorias(categorias);
 
-        // 4. Guardamos la entidad completa en la base de datos
         Material materialGuardado = materialRepository.save(nuevoMaterial);
-
-        // 5. Usamos el mapper de nuevo para devolver el DTO de respuesta con el ID generado
         return catalogoMapper.toMaterialDetalleDTO(materialGuardado);
+    }
+
+    // =================================================================
+    // MÉTODOS PARA AUTOR
+    // =================================================================
+
+    @Transactional(readOnly = true)
+    public List<AutorResponseDTO> findAllAutores() {
+        return autorRepository.findAll().stream()
+                .map(catalogoMapper::toAutorResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public AutorResponseDTO findAutorById(Long id) {
+        Autor autor = autorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Autor no encontrado con ID: " + id));
+        return catalogoMapper.toAutorResponseDTO(autor);
+    }
+
+    @Transactional
+    public AutorResponseDTO crearAutor(CrearAutorRequestDTO request) {
+        if (autorRepository.existsByNombreCompleto(request.getNombreCompleto())) {
+            throw new BusinessRuleException("El autor '" + request.getNombreCompleto() + "' ya existe.");
+        }
+        Autor nuevoAutor = catalogoMapper.toAutor(request);
+        Autor autorGuardado = autorRepository.save(nuevoAutor);
+        return catalogoMapper.toAutorResponseDTO(autorGuardado);
+    }
+
+    @Transactional
+    public AutorResponseDTO actualizarAutor(Long id, ActualizarAutorRequestDTO request) {
+        Autor autorExistente = autorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Autor no encontrado con ID: " + id));
+        catalogoMapper.updateAutorFromDto(request, autorExistente);
+        Autor autorActualizado = autorRepository.save(autorExistente);
+        return catalogoMapper.toAutorResponseDTO(autorActualizado);
+    }
+
+    @Transactional
+    public void eliminarAutor(Long id) {
+        if (!autorRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Autor no encontrado con ID: " + id);
+        }
+        if (materialRepository.existsByAutoresId(id)) {
+            throw new BusinessRuleException("No se puede eliminar el autor porque está asociado a uno o más materiales.");
+        }
+        autorRepository.deleteById(id);
+    }
+
+    // =================================================================
+    // MÉTODOS PARA CATEGORIA
+    // =================================================================
+
+    @Transactional(readOnly = true)
+    public List<CategoriaResponseDTO> findAllCategorias() {
+        return categoriaRepository.findAll().stream()
+                .map(catalogoMapper::toCategoriaResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public CategoriaResponseDTO findCategoriaById(Long id) {
+        Categoria categoria = categoriaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada con ID: " + id));
+        return catalogoMapper.toCategoriaResponseDTO(categoria);
+    }
+
+    @Transactional
+    public CategoriaResponseDTO crearCategoria(CrearCategoriaRequestDTO request) {
+        if (categoriaRepository.existsByNombreCategoria(request.getNombreCategoria())) {
+            throw new BusinessRuleException("La categoría '" + request.getNombreCategoria() + "' ya existe.");
+        }
+        Categoria nuevaCategoria = catalogoMapper.toCategoria(request);
+        Categoria categoriaGuardada = categoriaRepository.save(nuevaCategoria);
+        return catalogoMapper.toCategoriaResponseDTO(categoriaGuardada);
+    }
+
+    @Transactional
+    public CategoriaResponseDTO actualizarCategoria(Long id, ActualizarCategoriaRequestDTO request) {
+        Categoria categoriaExistente = categoriaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada con ID: " + id));
+        catalogoMapper.updateCategoriaFromDto(request, categoriaExistente);
+        Categoria categoriaActualizada = categoriaRepository.save(categoriaExistente);
+        return catalogoMapper.toCategoriaResponseDTO(categoriaActualizada);
+    }
+
+    @Transactional
+    public void eliminarCategoria(Long id) {
+        if (!categoriaRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Categoría no encontrada con ID: " + id);
+        }
+        if (materialRepository.existsByCategoriasId(id)) {
+            throw new BusinessRuleException("No se puede eliminar la categoría porque está asociada a uno o más materiales.");
+        }
+        categoriaRepository.deleteById(id);
+    }
+
+    // =================================================================
+    // MÉTODOS PARA EDITORIAL
+    // =================================================================
+
+    @Transactional(readOnly = true)
+    public List<EditorialResponseDTO> findAllEditoriales() {
+        return editorialRepository.findAll().stream()
+                .map(catalogoMapper::toEditorialResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public EditorialResponseDTO findEditorialById(Long id) {
+        Editorial editorial = editorialRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Editorial no encontrada con ID: " + id));
+        return catalogoMapper.toEditorialResponseDTO(editorial);
+    }
+
+    @Transactional
+    public EditorialResponseDTO crearEditorial(CrearEditorialRequestDTO request) {
+        if (editorialRepository.existsByNombre(request.getNombre())) {
+            throw new BusinessRuleException("La editorial '" + request.getNombre() + "' ya existe.");
+        }
+        Editorial nuevaEditorial = catalogoMapper.toEditorial(request);
+        Editorial editorialGuardada = editorialRepository.save(nuevaEditorial);
+        return catalogoMapper.toEditorialResponseDTO(editorialGuardada);
+    }
+
+    @Transactional
+    public EditorialResponseDTO actualizarEditorial(Long id, ActualizarEditorialRequestDTO request) {
+        Editorial editorialExistente = editorialRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Editorial no encontrada con ID: " + id));
+        catalogoMapper.updateEditorialFromDto(request, editorialExistente);
+        Editorial editorialActualizada = editorialRepository.save(editorialExistente);
+        return catalogoMapper.toEditorialResponseDTO(editorialActualizada);
+    }
+
+    @Transactional
+    public void eliminarEditorial(Long id) {
+        if (!editorialRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Editorial no encontrada con ID: " + id);
+        }
+        if (materialRepository.existsByEditorialId(id)) {
+            throw new BusinessRuleException("No se puede eliminar la editorial porque está asociada a uno o más materiales.");
+        }
+        editorialRepository.deleteById(id);
     }
 }

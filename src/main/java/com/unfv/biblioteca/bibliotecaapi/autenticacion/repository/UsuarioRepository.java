@@ -8,12 +8,6 @@ import java.util.Optional;
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
-    // Aquí se puede agregar métodos personalizados si es necesario
-    // Por ejemplo, para buscar usuarios por nombre de usuario o correo electrónico
-
-    // public Optional<Usuario> findByUsername(String username);
-    // public Optional<Usuario> findByEmail(String email);
-
     boolean existsByDni(String dni);
     boolean existsByCodigoUniversitario(String codigo);
     boolean existsByEmail(String email);

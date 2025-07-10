@@ -7,7 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AutorRepository  extends JpaRepository<Autor, Long> {
 
-    // Aquí puedes agregar métodos personalizados si es necesario
-    // Por ejemplo, para buscar autores por nombre:
-    // List<Autor> findByNombre(String nombre);
+    boolean existsByNombreCompleto(String nombreCompleto);
 }
