@@ -74,6 +74,42 @@ public class CatalogoService {
         return catalogoMapper.toMaterialDetalleDTO(materialGuardado);
     }
 
+    @Transactional
+    public MaterialDetalleDTO actualizarMaterial(Long id, ActualizarMaterialRequestDTO request) {
+        Material materialExistente = materialRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Material no encontrado con ID: " + id));
+
+        Editorial editorial = editorialRepository.findById(request.getEditorialId())
+                .orElseThrow(() -> new ResourceNotFoundException("Editorial no encontrada con ID: " + request.getEditorialId()));
+
+        Set<Autor> autores = new HashSet<>(autorRepository.findAllById(request.getAutoresIds()));
+        Set<Categoria> categorias = new HashSet<>(categoriaRepository.findAllById(request.getCategoriasIds()));
+
+        catalogoMapper.updateMaterialFromDto(request, materialExistente);
+        materialExistente.setEditorial(editorial);
+        materialExistente.setAutores(autores);
+        materialExistente.setCategorias(categorias);
+
+        Material materialActualizado = materialRepository.save(materialExistente);
+        return catalogoMapper.toMaterialDetalleDTO(materialActualizado);
+    }
+
+    @Transactional
+    public void eliminarMaterial(Long id) {
+        if (!materialRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Material no encontrado con ID: " + id);
+        }
+        // Aquí se podrían agregar reglas de negocio, como no poder eliminar si tiene ejemplares asociados.
+        materialRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MaterialDetalleDTO> findAllMateriales() {
+        return materialRepository.findAll().stream()
+                .map(catalogoMapper::toMaterialDetalleDTO)
+                .collect(Collectors.toList());
+    }
+
     // =================================================================
     // MÉTODOS PARA AUTOR
     // =================================================================

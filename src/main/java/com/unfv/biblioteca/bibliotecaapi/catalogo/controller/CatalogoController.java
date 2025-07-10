@@ -39,6 +39,22 @@ public class CatalogoController {
         return ResponseEntity.ok(materialEncontrado);
     }
 
+    @GetMapping("/materiales")
+    public ResponseEntity<List<MaterialDetalleDTO>> listarMateriales() {
+        return ResponseEntity.ok(catalogoService.findAllMateriales());
+    }
+
+    @PutMapping("/materiales/{id}")
+    public ResponseEntity<MaterialDetalleDTO> actualizarMaterial(@PathVariable Long id, @Valid @RequestBody ActualizarMaterialRequestDTO request) {
+        return ResponseEntity.ok(catalogoService.actualizarMaterial(id, request));
+    }
+
+    @DeleteMapping("/materiales/{id}")
+    public ResponseEntity<Void> eliminarMaterial(@PathVariable Long id) {
+        catalogoService.eliminarMaterial(id);
+        return ResponseEntity.noContent().build();
+    }
+
     // =================================================================
     // ENDPOINTS PARA AUTORES
     // =================================================================
