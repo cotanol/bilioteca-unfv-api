@@ -1,6 +1,6 @@
 package com.unfv.biblioteca.bibliotecaapi.circulacion.mapper;
 
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.mapper.UsuarioMapper;
+import com.unfv.biblioteca.bibliotecaapi.autenticacion.mapper.AuthMapper;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.mapper.CatalogoMapper;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.domain.Multa;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.domain.Prestamo;
@@ -10,7 +10,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 // Aquí le indicamos a MapStruct que puede usar otros mappers que ya hemos definido
-@Mapper(componentModel = "spring", uses = {CatalogoMapper.class, UsuarioMapper.class})
+@Mapper(componentModel = "spring", uses = {CatalogoMapper.class, AuthMapper.class})
 public interface CirculacionMapper {
 
     /**
