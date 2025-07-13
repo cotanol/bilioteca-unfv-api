@@ -38,14 +38,18 @@ public class AuthService {
         Usuario usuario = usuarioRepository.findByCodigoUniversitario(request.getCodigoUniversitario())
                 .orElseThrow(() -> new ResourceNotFoundException("Credenciales incorrectas"));
 
+        // Inyectar Passsword Encoder seria lo mejor (futuro)
         if (!usuario.getPasswordHash().equals(request.getPassword())) {
             throw new ResourceNotFoundException("Credenciales incorrectas");
         }
 
         String fakeToken = "fake-jwt-token-for-" + usuario.getEmail();
 
+        UsuarioDetalleDTO usuarioDto = authMapper.toUsuarioDetalleDTO(usuario);
+
         return AuthResponseDTO.builder()
                 .token(fakeToken)
+                .usuario(usuarioDto)
                 .build();
     }
 
