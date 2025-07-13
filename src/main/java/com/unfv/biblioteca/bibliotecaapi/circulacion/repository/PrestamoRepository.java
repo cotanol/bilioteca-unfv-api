@@ -14,4 +14,8 @@ public interface PrestamoRepository extends JpaRepository<Prestamo, Long> {
     long countByEjemplar_MaterialIdAndEstado(Long materialId, String estado);
 
     List<Prestamo> findByEstadoAndFechaDevolucionPactadaBefore(String estado, LocalDate fecha);
+
+    List<Prestamo> findByUsuarioIdAndEstadoIn(Long usuarioId, List<String> estados);
+
+    List<Prestamo> findByUsuarioId(Long usuarioId);
 }

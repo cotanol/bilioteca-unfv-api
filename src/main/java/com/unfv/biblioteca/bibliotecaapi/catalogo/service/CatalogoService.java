@@ -110,6 +110,13 @@ public class CatalogoService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<MaterialDetalleDTO> buscarMaterialPorTitulo(String titulo) {
+        return materialRepository.findByTituloContainingIgnoreCase(titulo).stream()
+                .map(catalogoMapper::toMaterialDetalleDTO)
+                .collect(Collectors.toList());
+    }
+
     // =================================================================
     // MÉTODOS PARA AUTOR
     // =================================================================

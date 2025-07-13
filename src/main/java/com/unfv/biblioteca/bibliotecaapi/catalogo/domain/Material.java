@@ -1,5 +1,6 @@
 package com.unfv.biblioteca.bibliotecaapi.catalogo.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -40,6 +41,7 @@ public class Material {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "editorial_id")
+    @JsonIgnore
     private Editorial editorial;
 
     @Column(length = 50)
@@ -67,6 +69,7 @@ public class Material {
             joinColumns = @JoinColumn(name = "material_id"),
             inverseJoinColumns = @JoinColumn(name = "autor_id")
     )
+    @JsonIgnore
     private Set<Autor> autores = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -75,6 +78,7 @@ public class Material {
             joinColumns = @JoinColumn(name = "material_id"),
             inverseJoinColumns = @JoinColumn(name = "categoria_id")
     )
+    @JsonIgnore
     private Set<Categoria> categorias = new HashSet<>();
 
     // --- Métodos de Ayuda (Helper Methods) ---

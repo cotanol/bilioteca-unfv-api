@@ -1,5 +1,6 @@
 package com.unfv.biblioteca.bibliotecaapi.circulacion.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,6 +32,7 @@ public class Multa {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prestamo_id", nullable = false)
+    @JsonIgnore
     private Prestamo prestamo;
 
     @Column(nullable = false, precision = 8, scale = 2)

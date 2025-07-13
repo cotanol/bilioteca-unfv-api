@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PrestamoService {
@@ -190,5 +192,22 @@ public class PrestamoService {
 
         // 7. Devolvemos el DTO actualizado
         return circulacionMapper.toPrestamoDetalleDTO(prestamoRenovado);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PrestamoDetalleDTO> buscarPrestamosActivosPorUsuario(Long usuarioId) {
+        List<String> estados = List.of("Activo", "Con Retraso");
+        List<Prestamo> prestamos = prestamoRepository.findByUsuarioIdAndEstadoIn(usuarioId, estados);
+        return prestamos.stream()
+                .map(circulacionMapper::toPrestamoDetalleDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<PrestamoDetalleDTO> buscarHistorialPrestamosPorUsuario(Long usuarioId) {
+        List<Prestamo> prestamos = prestamoRepository.findByUsuarioId(usuarioId);
+        return prestamos.stream()
+                .map(circulacionMapper::toPrestamoDetalleDTO)
+                .collect(Collectors.toList());
     }
 }

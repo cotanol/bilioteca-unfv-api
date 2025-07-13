@@ -1,20 +1,16 @@
 package com.unfv.biblioteca.bibliotecaapi.reserva.dto.response;
 
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.UsuarioDetalleDTO;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.MaterialDetalleDTO;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Data
-@Builder
+@Getter
+@Setter
 public class ReservaDetalleDTO {
 
     private Long id;
+    private String tituloMaterial;
     private LocalDateTime fechaReserva;
     private String estado;
-    private UsuarioDetalleDTO usuario;
-    private MaterialDetalleDTO material;
 }
-

@@ -7,9 +7,11 @@ import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.LoginRequestD
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.AuthResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.ActualizarTipoUsuarioRequestDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.CrearTipoUsuarioRequestDTO;
+import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.PerfilResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.TipoUsuarioResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.UsuarioDetalleDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.service.AuthService;
+import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.PrestamoDetalleDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -81,7 +83,17 @@ public class AuthController {
 
     @DeleteMapping("/tipos-usuario/{id}")
     public ResponseEntity<Void> eliminarTipoUsuario(@PathVariable Long id) {
-        authService.eliminarTipoUsuario(id);
+        authService.eliminarUsuario(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/perfil/{id}")
+    public ResponseEntity<PerfilResponseDTO> obtenerPerfil(@PathVariable Long id) {
+        return ResponseEntity.ok(authService.obtenerPerfilUsuarioLogueado(id));
+    }
+
+    @GetMapping("/perfil/historial/{id}")
+    public ResponseEntity<List<PrestamoDetalleDTO>> obtenerHistorialPrestamos(@PathVariable Long id) {
+        return ResponseEntity.ok(authService.getHistorialPrestamosUsuario(id));
     }
 }

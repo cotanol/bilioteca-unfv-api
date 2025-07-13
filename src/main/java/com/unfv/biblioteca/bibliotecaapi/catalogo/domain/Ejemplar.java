@@ -1,5 +1,6 @@
 package com.unfv.biblioteca.bibliotecaapi.catalogo.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,6 +31,7 @@ public class Ejemplar {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "material_id", nullable = false)
+    @JsonIgnore
     private Material material;
 
     @Column(name = "codigo_barras", unique = true, nullable = false, length = 50)
@@ -37,6 +39,7 @@ public class Ejemplar {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ubicacion_id", nullable = false)
+    @JsonIgnore
     private Ubicacion ubicacion;
 
     @Column(nullable = false, length = 50)

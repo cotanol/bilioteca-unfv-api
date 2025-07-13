@@ -1,5 +1,6 @@
 package com.unfv.biblioteca.bibliotecaapi.circulacion.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.domain.Usuario;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Ejemplar;
 import jakarta.persistence.*;
@@ -33,10 +34,12 @@ public class Prestamo {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ejemplar_id", nullable = false)
+    @JsonIgnore
     private Ejemplar ejemplar;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
+    @JsonIgnore
     private Usuario usuario;
 
     @Column(name = "fecha_prestamo")

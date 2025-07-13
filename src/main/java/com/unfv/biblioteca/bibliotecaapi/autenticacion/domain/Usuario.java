@@ -1,5 +1,6 @@
 package com.unfv.biblioteca.bibliotecaapi.autenticacion.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -47,6 +48,7 @@ public class Usuario {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_usuario_id")
+    @JsonIgnore
     private TipoUsuario tipoUsuario;
 
     @Column(length = 20)

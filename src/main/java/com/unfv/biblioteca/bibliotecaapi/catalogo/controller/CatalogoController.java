@@ -44,6 +44,11 @@ public class CatalogoController {
         return ResponseEntity.ok(catalogoService.findAllMateriales());
     }
 
+    @GetMapping("/materiales/search")
+    public ResponseEntity<List<MaterialDetalleDTO>> buscarMaterialesPorTitulo(@RequestParam("titulo") String titulo) {
+        return ResponseEntity.ok(catalogoService.buscarMaterialPorTitulo(titulo));
+    }
+
     @PutMapping("/materiales/{id}")
     public ResponseEntity<MaterialDetalleDTO> actualizarMaterial(@PathVariable Long id, @Valid @RequestBody ActualizarMaterialRequestDTO request) {
         return ResponseEntity.ok(catalogoService.actualizarMaterial(id, request));

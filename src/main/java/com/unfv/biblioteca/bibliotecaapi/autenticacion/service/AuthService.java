@@ -7,6 +7,7 @@ import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.ActualizarUsu
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.CrearUsuarioRequestDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.LoginRequestDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.AuthResponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.PerfilResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.UsuarioDetalleDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.mapper.AuthMapper;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.repository.TipoUsuarioRepository;
@@ -14,6 +15,12 @@ import com.unfv.biblioteca.bibliotecaapi.autenticacion.repository.UsuarioReposit
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.ActualizarTipoUsuarioRequestDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.CrearTipoUsuarioRequestDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.TipoUsuarioResponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.MultaDTO;
+import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.PrestamoDetalleDTO;
+import com.unfv.biblioteca.bibliotecaapi.circulacion.service.MultaService;
+import com.unfv.biblioteca.bibliotecaapi.circulacion.service.PrestamoService;
+import com.unfv.biblioteca.bibliotecaapi.reserva.dto.response.ReservaDetalleDTO;
+import com.unfv.biblioteca.bibliotecaapi.reserva.service.ReservaService;
 import com.unfv.biblioteca.bibliotecaapi.shared.exception.BusinessRuleException;
 import com.unfv.biblioteca.bibliotecaapi.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +38,9 @@ public class AuthService {
     private final UsuarioRepository usuarioRepository;
     private final TipoUsuarioRepository tipoUsuarioRepository;
     private final AuthMapper authMapper;
+    private final PrestamoService prestamoService;
+    private final MultaService multaService;
+    private final ReservaService reservaService;
 
     // Métodos para Usuario
     @Transactional
@@ -162,5 +172,25 @@ public class AuthService {
             throw new ResourceNotFoundException("Tipo de usuario no encontrado con ID: " + id);
         }
         tipoUsuarioRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public PerfilResponseDTO obtenerPerfilUsuarioLogueado(Long usuarioId) {
+        UsuarioDetalleDTO usuarioDto = buscarUsuarioPorId(usuarioId);
+        List<PrestamoDetalleDTO> prestamos = prestamoService.buscarPrestamosActivosPorUsuario(usuarioId);
+        List<ReservaDetalleDTO> reservas = reservaService.buscarReservasActivasPorUsuario(usuarioId);
+        List<MultaDTO> multas = multaService.buscarMultasPendientesPorUsuario(usuarioId);
+
+        return PerfilResponseDTO.builder()
+                .datosUsuario(usuarioDto)
+                .prestamosActivos(prestamos)
+                .reservasActivas(reservas)
+                .multasPendientes(multas)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PrestamoDetalleDTO> getHistorialPrestamosUsuario(Long usuarioId) {
+        return prestamoService.buscarHistorialPrestamosPorUsuario(usuarioId);
     }
 }
