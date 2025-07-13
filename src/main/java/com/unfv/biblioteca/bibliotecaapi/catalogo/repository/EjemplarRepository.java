@@ -11,5 +11,7 @@ public interface EjemplarRepository extends JpaRepository<Ejemplar, Long> {
 
     boolean existsByUbicacionId(Long ubicacionId);
 
+    long countByMaterialIdAndEstado(Long materialId, String estado);
+
     long countByMaterialId(Long materialId);
 }

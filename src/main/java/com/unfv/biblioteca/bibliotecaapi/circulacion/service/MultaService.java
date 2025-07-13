@@ -6,7 +6,10 @@ import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.MultaDTO;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.mapper.CirculacionMapper;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.repository.MultaRepository;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.repository.PrestamoRepository;
+import com.unfv.biblioteca.bibliotecaapi.shared.exception.BusinessRuleException;
+import com.unfv.biblioteca.bibliotecaapi.shared.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,18 +21,18 @@ import java.util.stream.Collectors;
 
 @Service
 public class MultaService {
-    // Mas adelante se puede agregar el PrestamoRepository si es necesario para buscar préstamos por ID
     private final MultaRepository multaRepository;
+    private final PrestamoRepository prestamoRepository;
     private final CirculacionMapper circulacionMapper;
 
     @Autowired
     public MultaService(MultaRepository multaRepository,
+                        PrestamoRepository prestamoRepository,
                         CirculacionMapper circulacionMapper) {
         this.multaRepository = multaRepository;
+        this.prestamoRepository = prestamoRepository;
         this.circulacionMapper = circulacionMapper;
     }
-
-    // Aquí irían los métodos para manejar la lógica de negocio de las multas
 
     // Definimos la tasa de la multa como una constante
     private static final BigDecimal TASA_DIARIA_MULTA = new BigDecimal("1.00"); // S/ 1.00 por día
@@ -38,7 +41,7 @@ public class MultaService {
     public MultaDTO generarMultaParaPrestamo(Prestamo prestamo) {
         // Regla 1: Verificar si ya existe una multa para este préstamo para no duplicarla
         if (multaRepository.existsByPrestamoId(prestamo.getId())) {
-            // Podríamos lanzar una excepción o simplemente registrar un log y salir
+            // lanzar una excepción o simplemente registrar un log y salir
             System.out.println("Ya existe una multa para el préstamo ID: " + prestamo.getId());
             return null; // O devolver la multa existente
         }
@@ -76,11 +79,11 @@ public class MultaService {
     public MultaDTO registrarPagoDeMulta(Long multaId) {
         // 1. Buscamos la multa
         Multa multa = multaRepository.findById(multaId)
-                .orElseThrow(() -> new RuntimeException("Multa no encontrada con ID: " + multaId));
+                .orElseThrow(() -> new ResourceNotFoundException("Multa no encontrada con ID: " + multaId));
 
         // 2. Regla de negocio: no se puede pagar una multa que ya está pagada
         if ("Pagada".equalsIgnoreCase(multa.getEstado())) {
-            throw new IllegalStateException("La multa ya ha sido pagada.");
+            throw new BusinessRuleException("La multa ya ha sido pagada.");
         }
 
         // 3. Actualizamos la entidad
@@ -95,12 +98,29 @@ public class MultaService {
 
     @Transactional(readOnly = true)
     public List<MultaDTO> buscarMultasPendientesPorUsuario(Long usuarioId) {
-        // 1. Llamamos al método del repositorio que atraviesa las relaciones
+        // 1. Llamamos al metodo del repositorio que atraviesa las relaciones
         List<Multa> multasEntidad = multaRepository.findByPrestamo_Usuario_IdAndEstado(usuarioId, "Pendiente");
 
         // 2. Mapeamos la lista de entidades a una lista de DTOs y la devolvemos
         return multasEntidad.stream()
                 .map(circulacionMapper::toMultaDTO)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Metodo programado para generar multas por retraso en los préstamos.
+     * Se ejecuta diariamente a las 00:05.
+     */
+    @Transactional
+    @Scheduled(cron = "0 5 0 * * ?")
+    public void generarMultasPorRetraso() {
+        LocalDate hoy = LocalDate.now();
+        List<Prestamo> prestamosVencidos = prestamoRepository.findByEstadoAndFechaDevolucionPactadaBefore("Activo", hoy);
+
+        for (Prestamo prestamo : prestamosVencidos) {
+            prestamo.setEstado("Con Retraso");
+            prestamoRepository.save(prestamo);
+            generarMultaParaPrestamo(prestamo);
+        }
     }
 }

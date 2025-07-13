@@ -8,109 +8,75 @@ import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.MaterialRepository;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.repository.PrestamoRepository;
 import com.unfv.biblioteca.bibliotecaapi.reserva.domain.Reserva;
 import com.unfv.biblioteca.bibliotecaapi.reserva.dto.request.CrearReservaRequestDTO;
-import com.unfv.biblioteca.bibliotecaapi.reserva.dto.response.ReservaDetalleDTO;
+import com.unfv.biblioteca.bibliotecaapi.reserva.dto.response.ReservaResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.reserva.mapper.ReservaMapper;
 import com.unfv.biblioteca.bibliotecaapi.reserva.repository.ReservaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.unfv.biblioteca.bibliotecaapi.shared.exception.BusinessRuleException;
+import com.unfv.biblioteca.bibliotecaapi.shared.exception.ResourceNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
 @Service
+@RequiredArgsConstructor
 public class ReservaService {
 
     private final ReservaRepository reservaRepository;
-    private final MaterialRepository materialRepository;
     private final UsuarioRepository usuarioRepository;
+    private final MaterialRepository materialRepository;
     private final PrestamoRepository prestamoRepository;
-    private final EjemplarRepository exemplarRepository;
+    private final EjemplarRepository ejemplarRepository;
     private final ReservaMapper reservaMapper;
 
-    @Autowired
-    public ReservaService(ReservaRepository reservaRepository,
-                          MaterialRepository materialRepository,
-                          UsuarioRepository usuarioRepository,
-                          PrestamoRepository prestamoRepository,
-                          EjemplarRepository exemplarRepository,
-                          ReservaMapper reservaMapper) {
-        this.reservaRepository = reservaRepository;
-        this.materialRepository = materialRepository;
-        this.usuarioRepository = usuarioRepository;
-        this.prestamoRepository = prestamoRepository;
-        this.exemplarRepository = exemplarRepository;
-        this.reservaMapper = reservaMapper;
-    }
-
     @Transactional
-    public ReservaDetalleDTO crearReserva(CrearReservaRequestDTO request) {
-        // 1. Buscamos las entidades a partir de los IDs
+    public ReservaResponseDTO crearReserva(CrearReservaRequestDTO request) {
         Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
         Material material = materialRepository.findById(request.getMaterialId())
-                .orElseThrow(() -> new RuntimeException("Material no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Material no encontrado"));
 
-        // === 2. APLICAMOS LAS REGLAS DE NEGOCIO ===
+        // REGLA 0: Verificar que existan ejemplares físicos del material
+        long totalEjemplares = ejemplarRepository.countByMaterialId(material.getId());
 
-        // Regla 1: El usuario debe estar activo
-        if (!"Activo".equalsIgnoreCase(usuario.getEstado())) {
-            throw new IllegalStateException("El usuario no se encuentra activo.");
+        if (totalEjemplares == 0) {
+            throw new BusinessRuleException("No se puede reservar. La biblioteca no posee ningún ejemplar de este material.");
         }
 
-        // Regla 2: El usuario no puede reservar un material que ya tiene en préstamo
+        // Regla 1: El usuario no puede reservar un material que ya tiene en préstamo
         if (prestamoRepository.existsByUsuarioIdAndEjemplar_MaterialIdAndEstado(usuario.getId(), material.getId(), "Activo")) {
-            throw new IllegalStateException("No se puede reservar un material que ya tiene en préstamo.");
+            throw new BusinessRuleException("No puede reservar un material que ya tiene en préstamo.");
         }
 
-        // Regla 3: El usuario no puede tener una reserva activa para el mismo material
-        if (reservaRepository.existsByUsuarioIdAndMaterialIdAndEstado(usuario.getId(), material.getId(), "Activa")) {
-            throw new IllegalStateException("Ya tiene una reserva activa para este material.");
+        // Regla 2: No se puede reservar si hay ejemplares disponibles
+        long ejemplaresDisponibles = ejemplarRepository.countByMaterialIdAndEstado(material.getId(), "Disponible");
+        if (ejemplaresDisponibles > 0) {
+            throw new BusinessRuleException("No se puede reservar, aún hay ejemplares disponibles para préstamo.");
         }
 
-        // Regla 4: Solo se puede reservar si no hay ejemplares disponibles para préstamo inmediato
-        long totalEjemplares = exemplarRepository.countByMaterialId(material.getId());
-        long ejemplaresEnPrestamo = prestamoRepository.countByEjemplar_MaterialIdAndEstado(material.getId(), "Activo");
-
-        if (totalEjemplares > ejemplaresEnPrestamo) {
-            throw new IllegalStateException("Hay ejemplares disponibles de este material. No es necesario reservar, puede solicitar un préstamo directamente.");
-        }
-
-        // === 3. SI TODAS LAS REGLAS PASAN, SE CREA LA RESERVA ===
-
-        Reserva nuevaReserva = new Reserva();
-        nuevaReserva.setUsuario(usuario);
-        nuevaReserva.setMaterial(material);
-        nuevaReserva.setEstado("Activa");
-        nuevaReserva.setFechaReserva(LocalDateTime.now());
+        Reserva nuevaReserva = Reserva.builder()
+                .usuario(usuario)
+                .material(material)
+                .fechaReserva(LocalDateTime.now())
+                .estado("Activa")
+                .build();
 
         Reserva reservaGuardada = reservaRepository.save(nuevaReserva);
-
-        // 4. Devolvemos el DTO de respuesta
-        return reservaMapper.toReservaDetalleDTO(reservaGuardada);
+        return reservaMapper.toDto(reservaGuardada);
     }
 
     @Transactional
-    public void cancelarReserva(Long reservaId, Long usuarioId) {
-        // 1. Buscamos la reserva
+    public void cancelarReserva(Long reservaId) {
         Reserva reserva = reservaRepository.findById(reservaId)
-                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada"));
 
-        // 2. Regla de Seguridad: Solo el usuario que hizo la reserva (o un admin) puede cancelarla
-        if (!reserva.getUsuario().getId().equals(usuarioId)) {
-            // En un sistema real, también verificaríamos si el usuario tiene rol de ADMIN
-            throw new SecurityException("No tiene permiso para cancelar esta reserva.");
+        if (!"Activa".equals(reserva.getEstado())) {
+            throw new BusinessRuleException("Solo se pueden cancelar reservas activas.");
         }
 
-        // 3. Regla de Negocio: Solo se pueden cancelar reservas activas
-        if (!"Activa".equalsIgnoreCase(reserva.getEstado())) {
-            throw new IllegalStateException("Solo se pueden cancelar reservas en estado 'Activa'.");
-        }
-
-        // 4. Actualizamos el estado
         reserva.setEstado("Cancelada");
         reservaRepository.save(reserva);
     }
-
-
-
 }

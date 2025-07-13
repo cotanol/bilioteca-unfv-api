@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Table(name = "reservas")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = {"material", "usuario"})
@@ -38,9 +39,9 @@ public class Reserva {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    @Column(name = "fecha_reserva")
+    @Column(name = "fecha_reserva", nullable = false)
     private LocalDateTime fechaReserva;
 
-    @Column(length = 20)
+    @Column(nullable = false, length = 20)
     private String estado;
 }

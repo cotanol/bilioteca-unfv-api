@@ -9,6 +9,7 @@ import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.request.CrearPrestamoRe
 import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.PrestamoDetalleDTO;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.mapper.CirculacionMapper;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.repository.PrestamoRepository;
+import com.unfv.biblioteca.bibliotecaapi.reserva.repository.ReservaRepository;
 import com.unfv.biblioteca.bibliotecaapi.shared.exception.BusinessRuleException;
 import com.unfv.biblioteca.bibliotecaapi.shared.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,17 +27,22 @@ public class PrestamoService {
     private final UsuarioRepository usuarioRepository;
     private final EjemplarRepository exemplarRepository;
     private final CirculacionMapper circulacionMapper;
-    // Podríamos inyectar MultaRepository/MultaService aquí si fuera necesario
+    private final MultaService multaService;
+    private final ReservaRepository reservaRepository;
 
     @Autowired
     public PrestamoService(PrestamoRepository prestamoRepository,
                            UsuarioRepository usuarioRepository,
                            EjemplarRepository exemplarRepository,
-                           CirculacionMapper circulacionMapper) {
+                           CirculacionMapper circulacionMapper,
+                           MultaService multaService,
+                           ReservaRepository reservaRepository) {
         this.prestamoRepository = prestamoRepository;
         this.usuarioRepository = usuarioRepository;
         this.exemplarRepository = exemplarRepository;
         this.circulacionMapper = circulacionMapper;
+        this.multaService = multaService;
+        this.reservaRepository = reservaRepository;
     }
 
     // Aquí irían los métodos para manejar la lógica de negocio de los préstamos
@@ -46,7 +52,7 @@ public class PrestamoService {
     public PrestamoDetalleDTO buscarPrestamoPorId(Long id) {
         // 1. Buscamos la entidad en la base de datos
         Prestamo prestamoEntidad = prestamoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Préstamo no encontrado con ID: " + id)); // Usar excepciones personalizadas es mejor
+                .orElseThrow(() -> new ResourceNotFoundException("Préstamo no encontrado con ID: " + id));
 
         // 2. Usamos el mapper para convertir y devolver el DTO
         return circulacionMapper.toPrestamoDetalleDTO(prestamoEntidad);
@@ -106,4 +112,83 @@ public class PrestamoService {
         return circulacionMapper.toPrestamoDetalleDTO(prestamoGuardado);
     }
 
+    @Transactional
+    public PrestamoDetalleDTO registrarDevolucion(Long prestamoId) {
+        // 1. Buscamos el préstamo
+        Prestamo prestamo = prestamoRepository.findById(prestamoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Préstamo no encontrado con ID: " + prestamoId));
+
+        // 2. Regla de negocio: no se puede devolver un préstamo que ya está devuelto
+        if ("Devuelto".equalsIgnoreCase(prestamo.getEstado())) {
+            throw new BusinessRuleException("El préstamo ya ha sido devuelto.");
+        }
+
+        // 3. Actualizamos el préstamo
+        prestamo.setEstado("Devuelto");
+        prestamo.setFechaDevolucionReal(LocalDateTime.now());
+
+        // 4. Actualizamos el estado del ejemplar a "Disponible"
+        Ejemplar ejemplar = prestamo.getEjemplar();
+        ejemplar.setEstado("Disponible");
+        exemplarRepository.save(ejemplar);
+
+        // 5. Verificamos si se debe generar una multa
+        if (prestamo.getFechaDevolucionReal().toLocalDate().isAfter(prestamo.getFechaDevolucionPactada())) {
+            multaService.generarMultaParaPrestamo(prestamo);
+        }
+
+        // 6. Guardamos los cambios en el préstamo
+        Prestamo prestamoActualizado = prestamoRepository.save(prestamo);
+
+        // 7. Gestionar cola de reservas
+        gestionarColaDeReservas(ejemplar.getMaterial().getId());
+
+        // 8. Devolvemos el DTO actualizado
+        return circulacionMapper.toPrestamoDetalleDTO(prestamoActualizado);
+    }
+
+    private void gestionarColaDeReservas(Long materialId) {
+        reservaRepository.findFirstByMaterialIdAndEstadoOrderByFechaReservaAsc(materialId, "Activa")
+                .ifPresent(reserva -> {
+                    // Aquí iría la lógica para notificar al usuario
+                    // Por ejemplo, enviar un email
+                    System.out.println("Notificando al usuario " + reserva.getUsuario().getEmail() + " que el material " + reserva.getMaterial().getTitulo() + " está disponible.");
+
+                    reserva.setEstado("Pendiente de Recojo");
+                    reservaRepository.save(reserva);
+                });
+    }
+
+    @Transactional
+    public PrestamoDetalleDTO renovarPrestamo(Long prestamoId) {
+        // 1. Buscamos el préstamo
+        Prestamo prestamo = prestamoRepository.findById(prestamoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Préstamo no encontrado con ID: " + prestamoId));
+
+        // 2. Regla de negocio: no se puede renovar un préstamo que no está activo
+        if (!"Activo".equalsIgnoreCase(prestamo.getEstado())) {
+            throw new BusinessRuleException("El préstamo no está activo, no se puede renovar.");
+        }
+
+        // 3. Regla de negocio: no se puede renovar si el material tiene reservas activas
+        if (reservaRepository.existsByMaterialIdAndEstado(prestamo.getEjemplar().getMaterial().getId(), "Activa")) {
+            throw new BusinessRuleException("El material de este préstamo tiene reservas activas y no puede ser renovado.");
+        }
+
+        // 4. Regla de negocio: Limitar el número de renovaciones (ej. a 2)
+        if (prestamo.getRenovaciones() >= 2) {
+            throw new BusinessRuleException("Este préstamo ya ha alcanzado el límite máximo de renovaciones.");
+        }
+
+        // 5. Actualizamos el préstamo
+        prestamo.setRenovaciones(prestamo.getRenovaciones() + 1);
+        LocalDate nuevaFechaDevolucion = prestamo.getFechaDevolucionPactada().plusDays(prestamo.getUsuario().getTipoUsuario().getDiasPrestamos());
+        prestamo.setFechaDevolucionPactada(nuevaFechaDevolucion);
+
+        // 6. Guardamos los cambios
+        Prestamo prestamoRenovado = prestamoRepository.save(prestamo);
+
+        // 7. Devolvemos el DTO actualizado
+        return circulacionMapper.toPrestamoDetalleDTO(prestamoRenovado);
+    }
 }

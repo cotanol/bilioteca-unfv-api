@@ -31,7 +31,7 @@ public class MultaController {
      * HTTP Method: POST
      * URL: /api/multas/{id}/pago
      */
-    @PostMapping("/{id}/pago")
+    @PutMapping("/{id}/pagar")
     public ResponseEntity<MultaDTO> registrarPagoDeMulta(@PathVariable Long id) {
         MultaDTO multaPagada = multaService.registrarPagoDeMulta(id);
         return ResponseEntity.ok(multaPagada);

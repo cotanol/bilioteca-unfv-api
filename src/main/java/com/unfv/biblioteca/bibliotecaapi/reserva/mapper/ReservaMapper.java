@@ -1,18 +1,16 @@
 package com.unfv.biblioteca.bibliotecaapi.reserva.mapper;
 
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.mapper.AuthMapper;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.mapper.CatalogoMapper;
 import com.unfv.biblioteca.bibliotecaapi.reserva.domain.Reserva;
-import com.unfv.biblioteca.bibliotecaapi.reserva.dto.response.ReservaDetalleDTO;
+import com.unfv.biblioteca.bibliotecaapi.reserva.dto.response.ReservaResponseDTO;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {CatalogoMapper.class, AuthMapper.class})
+@Mapper(componentModel = "spring")
 public interface ReservaMapper {
 
-    /**
-     * Convierte una entidad Reserva a su DTO de detalle.
-     * Al igual que en CirculacionMapper, reutiliza los otros mappers
-     * para convertir Material y Usuario.
-     */
-    ReservaDetalleDTO toReservaDetalleDTO(Reserva reserva);
+    @Mapping(source = "material.id", target = "materialId")
+    @Mapping(source = "material.titulo", target = "materialNombre")
+    @Mapping(source = "usuario.id", target = "usuarioId")
+    @Mapping(source = "usuario.nombres", target = "usuarioNombre")
+    ReservaResponseDTO toDto(Reserva reserva);
 }
