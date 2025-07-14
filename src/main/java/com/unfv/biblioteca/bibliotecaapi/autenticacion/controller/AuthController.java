@@ -9,9 +9,9 @@ import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.ActualizarTip
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.CrearTipoUsuarioRequestDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.PerfilResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.TipoUsuarioResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.UsuarioDetalleDTO;
+import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.UsuarioResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.service.AuthService;
-import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.PrestamoDetalleDTO;
+import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.PrestamoResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -34,22 +34,22 @@ public class AuthController {
     }
 
     @PostMapping("/registrar")
-    public ResponseEntity<UsuarioDetalleDTO> registrarUsuario(@Valid @RequestBody CrearUsuarioRequestDTO request) {
+    public ResponseEntity<UsuarioResponseDTO> registrarUsuario(@Valid @RequestBody CrearUsuarioRequestDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.crearUsuario(request));
     }
 
     @GetMapping("/usuarios")
-    public ResponseEntity<List<UsuarioDetalleDTO>> listarUsuarios() {
+    public ResponseEntity<List<UsuarioResponseDTO>> listarUsuarios() {
         return ResponseEntity.ok(authService.findAllUsuarios());
     }
 
     @GetMapping("/usuarios/{id}")
-    public ResponseEntity<UsuarioDetalleDTO> buscarUsuarioPorId(@PathVariable Long id) {
+    public ResponseEntity<UsuarioResponseDTO> buscarUsuarioPorId(@PathVariable Long id) {
         return ResponseEntity.ok(authService.buscarUsuarioPorId(id));
     }
 
     @PutMapping("/usuarios/{id}")
-    public ResponseEntity<UsuarioDetalleDTO> actualizarUsuario(@PathVariable Long id, @Valid @RequestBody ActualizarUsuarioRequestDTO request) {
+    public ResponseEntity<UsuarioResponseDTO> actualizarUsuario(@PathVariable Long id, @Valid @RequestBody ActualizarUsuarioRequestDTO request) {
         return ResponseEntity.ok(authService.actualizarUsuario(id, request));
     }
 
@@ -93,7 +93,7 @@ public class AuthController {
     }
 
     @GetMapping("/perfil/historial/{id}")
-    public ResponseEntity<List<PrestamoDetalleDTO>> obtenerHistorialPrestamos(@PathVariable Long id) {
+    public ResponseEntity<List<PrestamoResponseDTO>> obtenerHistorialPrestamos(@PathVariable Long id) {
         return ResponseEntity.ok(authService.getHistorialPrestamosUsuario(id));
     }
 }

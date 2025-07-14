@@ -7,7 +7,7 @@ import java.util.Set;
 
 @Data
 @Builder
-public class MaterialDetalleDTO {
+public class MaterialResponseDTO {
 
     private Long id;
     private String isbn;

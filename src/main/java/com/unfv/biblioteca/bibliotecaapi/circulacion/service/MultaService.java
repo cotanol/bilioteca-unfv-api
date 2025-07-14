@@ -2,7 +2,7 @@ package com.unfv.biblioteca.bibliotecaapi.circulacion.service;
 
 import com.unfv.biblioteca.bibliotecaapi.circulacion.domain.Multa;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.domain.Prestamo;
-import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.MultaDTO;
+import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.MultaReponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.mapper.CirculacionMapper;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.repository.MultaRepository;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.repository.PrestamoRepository;
@@ -38,7 +38,7 @@ public class MultaService {
     private static final BigDecimal TASA_DIARIA_MULTA = new BigDecimal("1.00"); // S/ 1.00 por día
 
     @Transactional
-    public MultaDTO generarMultaParaPrestamo(Prestamo prestamo) {
+    public MultaReponseDTO generarMultaParaPrestamo(Prestamo prestamo) {
         // Regla 1: Verificar si ya existe una multa para este préstamo para no duplicarla
         if (multaRepository.existsByPrestamoId(prestamo.getId())) {
             // lanzar una excepción o simplemente registrar un log y salir
@@ -76,7 +76,7 @@ public class MultaService {
     }
 
     @Transactional
-    public MultaDTO registrarPagoDeMulta(Long multaId) {
+    public MultaReponseDTO registrarPagoDeMulta(Long multaId) {
         // 1. Buscamos la multa
         Multa multa = multaRepository.findById(multaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Multa no encontrada con ID: " + multaId));
@@ -97,7 +97,7 @@ public class MultaService {
     }
 
     @Transactional(readOnly = true)
-    public List<MultaDTO> buscarMultasPendientesPorUsuario(Long usuarioId) {
+    public List<MultaReponseDTO> buscarMultasPendientesPorUsuario(Long usuarioId) {
         // 1. Llamamos al metodo del repositorio que atraviesa las relaciones
         List<Multa> multasEntidad = multaRepository.findByPrestamo_Usuario_IdAndEstado(usuarioId, "Pendiente");
 

@@ -1,12 +1,8 @@
 package com.unfv.biblioteca.bibliotecaapi.catalogo.controller;
 
 import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.request.*;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.AutorResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.CategoriaResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.EditorialResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.EjemplarResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.UbicacionResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.MaterialDetalleDTO;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.*;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.MaterialResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.service.CatalogoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,29 +24,29 @@ public class CatalogoController {
     // =================================================================
 
     @PostMapping("/materiales")
-    public ResponseEntity<MaterialDetalleDTO> crearMaterial(@Valid @RequestBody CrearMaterialRequestDTO request) {
-        MaterialDetalleDTO materialCreado = catalogoService.crearMaterial(request);
+    public ResponseEntity<MaterialResponseDTO> crearMaterial(@Valid @RequestBody CrearMaterialRequestDTO request) {
+        MaterialResponseDTO materialCreado = catalogoService.crearMaterial(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(materialCreado);
     }
 
     @GetMapping("/materiales/{id}")
-    public ResponseEntity<MaterialDetalleDTO> buscarMaterialPorId(@PathVariable Long id) {
-        MaterialDetalleDTO materialEncontrado = catalogoService.buscarMaterialPorId(id);
+    public ResponseEntity<MaterialResponseDTO> buscarMaterialPorId(@PathVariable Long id) {
+        MaterialResponseDTO materialEncontrado = catalogoService.buscarMaterialPorId(id);
         return ResponseEntity.ok(materialEncontrado);
     }
 
     @GetMapping("/materiales")
-    public ResponseEntity<List<MaterialDetalleDTO>> listarMateriales() {
+    public ResponseEntity<List<MaterialResponseDTO>> listarMateriales() {
         return ResponseEntity.ok(catalogoService.findAllMateriales());
     }
 
     @GetMapping("/materiales/search")
-    public ResponseEntity<List<MaterialDetalleDTO>> buscarMaterialesPorTitulo(@RequestParam("titulo") String titulo) {
+    public ResponseEntity<List<MaterialResponseDTO>> buscarMaterialesPorTitulo(@RequestParam("titulo") String titulo) {
         return ResponseEntity.ok(catalogoService.buscarMaterialPorTitulo(titulo));
     }
 
     @PutMapping("/materiales/{id}")
-    public ResponseEntity<MaterialDetalleDTO> actualizarMaterial(@PathVariable Long id, @Valid @RequestBody ActualizarMaterialRequestDTO request) {
+    public ResponseEntity<MaterialResponseDTO> actualizarMaterial(@PathVariable Long id, @Valid @RequestBody ActualizarMaterialRequestDTO request) {
         return ResponseEntity.ok(catalogoService.actualizarMaterial(id, request));
     }
 

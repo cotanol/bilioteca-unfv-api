@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Builder
@@ -17,5 +19,8 @@ public class UsuarioResponseDTO {
     private String apellidoMaterno;
     private String email;
     private String telefono;
+    private String tipoUsuario;
     private String estado;
+    private LocalDateTime fechaRegistro;
 }
+

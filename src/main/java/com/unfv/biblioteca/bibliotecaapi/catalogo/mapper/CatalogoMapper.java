@@ -20,7 +20,7 @@ public interface CatalogoMapper {
     @Mapping(source = "autores", target = "autores", qualifiedByName = "autoresToNombres")
     @Mapping(source = "categorias", target = "categorias", qualifiedByName = "categoriasToNombres")
     @Mapping(source = "urlImagen", target = "urlImagen")
-    MaterialDetalleDTO toMaterialDetalleDTO(Material material);
+    MaterialResponseDTO toMaterialDetalleDTO(Material material);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "editorial", ignore = true)
@@ -93,10 +93,8 @@ public interface CatalogoMapper {
     // MAPPERS PARA EJEMPLAR
     // =================================================================
 
-    @Mapping(source = "material.id", target = "materialId")
-    @Mapping(source = "material.titulo", target = "materialTitulo")
-    @Mapping(source = "ubicacion.id", target = "ubicacionId")
-    @Mapping(source = "ubicacion.bibliotecaNombre", target = "ubicacionNombre")
+    @Mapping(source = "material", target = "material")
+    @Mapping(source = "ubicacion", target = "ubicacion")
     EjemplarResponseDTO toEjemplarResponseDTO(Ejemplar ejemplar);
 
     @Mapping(target = "id", ignore = true)

@@ -7,12 +7,7 @@ import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Ejemplar;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Ubicacion;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Material;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.request.*;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.AutorResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.CategoriaResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.EditorialResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.EjemplarResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.UbicacionResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.MaterialDetalleDTO;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.*;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.mapper.CatalogoMapper;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.AutorRepository;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.CategoriaRepository;
@@ -48,14 +43,14 @@ public class CatalogoService {
     // =================================================================
 
     @Transactional(readOnly = true)
-    public MaterialDetalleDTO buscarMaterialPorId(Long id) {
+    public MaterialResponseDTO buscarMaterialPorId(Long id) {
         Material materialEntidad = materialRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Material con ID " + id + " no encontrado"));
         return catalogoMapper.toMaterialDetalleDTO(materialEntidad);
     }
 
     @Transactional
-    public MaterialDetalleDTO crearMaterial(CrearMaterialRequestDTO request) {
+    public MaterialResponseDTO crearMaterial(CrearMaterialRequestDTO request) {
         if (request.getIsbn() != null && materialRepository.existsByIsbn(request.getIsbn())) {
             throw new BusinessRuleException("El ISBN " + request.getIsbn() + " ya existe.");
         }
@@ -75,7 +70,7 @@ public class CatalogoService {
     }
 
     @Transactional
-    public MaterialDetalleDTO actualizarMaterial(Long id, ActualizarMaterialRequestDTO request) {
+    public MaterialResponseDTO actualizarMaterial(Long id, ActualizarMaterialRequestDTO request) {
         Material materialExistente = materialRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Material no encontrado con ID: " + id));
 
@@ -104,14 +99,14 @@ public class CatalogoService {
     }
 
     @Transactional(readOnly = true)
-    public List<MaterialDetalleDTO> findAllMateriales() {
+    public List<MaterialResponseDTO> findAllMateriales() {
         return materialRepository.findAll().stream()
                 .map(catalogoMapper::toMaterialDetalleDTO)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<MaterialDetalleDTO> buscarMaterialPorTitulo(String titulo) {
+    public List<MaterialResponseDTO> buscarMaterialPorTitulo(String titulo) {
         return materialRepository.findByTituloContainingIgnoreCase(titulo).stream()
                 .map(catalogoMapper::toMaterialDetalleDTO)
                 .collect(Collectors.toList());

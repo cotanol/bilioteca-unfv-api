@@ -17,8 +17,6 @@ public class EjemplarResponseDTO {
     private String codigoBarras;
     private String estado;
     private LocalDate fechaAdquisicion;
-    private Long materialId;
-    private String materialTitulo;
-    private Long ubicacionId;
-    private String ubicacionNombre;
+    private MaterialResponseDTO material;
+    private UbicacionResponseDTO ubicacion;
 }

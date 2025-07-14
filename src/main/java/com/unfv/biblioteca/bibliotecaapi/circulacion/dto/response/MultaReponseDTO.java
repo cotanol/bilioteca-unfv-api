@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class MultaDTO {
+public class MultaReponseDTO {
 
     private Long id;
     private Long prestamoId;

@@ -6,7 +6,7 @@ import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Ejemplar;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.EjemplarRepository;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.domain.Prestamo;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.request.CrearPrestamoRequestDTO;
-import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.PrestamoDetalleDTO;
+import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.PrestamoResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.mapper.CirculacionMapper;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.repository.PrestamoRepository;
 import com.unfv.biblioteca.bibliotecaapi.reserva.repository.ReservaRepository;
@@ -51,7 +51,7 @@ public class PrestamoService {
     // Por ejemplo: crear préstamo, devolver préstamo, calcular multas, etc.
 
     @Transactional(readOnly = true)
-    public PrestamoDetalleDTO buscarPrestamoPorId(Long id) {
+    public PrestamoResponseDTO buscarPrestamoPorId(Long id) {
         // 1. Buscamos la entidad en la base de datos
         Prestamo prestamoEntidad = prestamoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Préstamo no encontrado con ID: " + id));
@@ -61,7 +61,7 @@ public class PrestamoService {
     }
 
     @Transactional // Transacción de lectura y escritura
-    public PrestamoDetalleDTO crearPrestamo(CrearPrestamoRequestDTO request) {
+    public PrestamoResponseDTO crearPrestamo(CrearPrestamoRequestDTO request) {
         // 1. Buscamos las entidades principales a partir de los IDs del DTO
         Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
@@ -115,7 +115,7 @@ public class PrestamoService {
     }
 
     @Transactional
-    public PrestamoDetalleDTO registrarDevolucion(Long prestamoId) {
+    public PrestamoResponseDTO registrarDevolucion(Long prestamoId) {
         // 1. Buscamos el préstamo
         Prestamo prestamo = prestamoRepository.findById(prestamoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Préstamo no encontrado con ID: " + prestamoId));
@@ -162,7 +162,7 @@ public class PrestamoService {
     }
 
     @Transactional
-    public PrestamoDetalleDTO renovarPrestamo(Long prestamoId) {
+    public PrestamoResponseDTO renovarPrestamo(Long prestamoId) {
         // 1. Buscamos el préstamo
         Prestamo prestamo = prestamoRepository.findById(prestamoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Préstamo no encontrado con ID: " + prestamoId));
@@ -195,7 +195,7 @@ public class PrestamoService {
     }
 
     @Transactional(readOnly = true)
-    public List<PrestamoDetalleDTO> buscarPrestamosActivosPorUsuario(Long usuarioId) {
+    public List<PrestamoResponseDTO> buscarPrestamosActivosPorUsuario(Long usuarioId) {
         List<String> estados = List.of("Activo", "Con Retraso");
         List<Prestamo> prestamos = prestamoRepository.findByUsuarioIdAndEstadoIn(usuarioId, estados);
         return prestamos.stream()
@@ -204,7 +204,7 @@ public class PrestamoService {
     }
 
     @Transactional(readOnly = true)
-    public List<PrestamoDetalleDTO> buscarHistorialPrestamosPorUsuario(Long usuarioId) {
+    public List<PrestamoResponseDTO> buscarHistorialPrestamosPorUsuario(Long usuarioId) {
         List<Prestamo> prestamos = prestamoRepository.findByUsuarioId(usuarioId);
         return prestamos.stream()
                 .map(circulacionMapper::toPrestamoDetalleDTO)

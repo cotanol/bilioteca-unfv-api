@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class PrestamoDetalleDTO {
+public class PrestamoResponseDTO {
 
     private Long id;
     private String codigoBarrasEjemplar;

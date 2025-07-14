@@ -6,7 +6,7 @@ import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.ActualizarTip
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.ActualizarUsuarioRequestDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.CrearTipoUsuarioRequestDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.TipoUsuarioResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.UsuarioDetalleDTO;
+import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.UsuarioResponseDTO;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -18,7 +18,7 @@ public interface AuthMapper {
 
     // Mapeos de Usuario
     @Mapping(source = "tipoUsuario.nombreTipo", target = "tipoUsuario")
-    UsuarioDetalleDTO toUsuarioDetalleDTO(Usuario usuario);
+    UsuarioResponseDTO toUsuarioDetalleDTO(Usuario usuario);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)

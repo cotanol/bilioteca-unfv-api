@@ -8,18 +8,18 @@ import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.CrearUsuarioR
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.LoginRequestDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.AuthResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.PerfilResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.UsuarioDetalleDTO;
+import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.UsuarioResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.mapper.AuthMapper;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.repository.TipoUsuarioRepository;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.repository.UsuarioRepository;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.ActualizarTipoUsuarioRequestDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.CrearTipoUsuarioRequestDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.TipoUsuarioResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.MultaDTO;
-import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.PrestamoDetalleDTO;
+import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.MultaReponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.PrestamoResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.service.MultaService;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.service.PrestamoService;
-import com.unfv.biblioteca.bibliotecaapi.reserva.dto.response.ReservaDetalleDTO;
+import com.unfv.biblioteca.bibliotecaapi.reserva.dto.response.ReservaResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.reserva.service.ReservaService;
 import com.unfv.biblioteca.bibliotecaapi.shared.exception.BusinessRuleException;
 import com.unfv.biblioteca.bibliotecaapi.shared.exception.ResourceNotFoundException;
@@ -55,7 +55,7 @@ public class AuthService {
 
         String fakeToken = "fake-jwt-token-for-" + usuario.getEmail();
 
-        UsuarioDetalleDTO usuarioDto = authMapper.toUsuarioDetalleDTO(usuario);
+        UsuarioResponseDTO usuarioDto = authMapper.toUsuarioDetalleDTO(usuario);
 
         return AuthResponseDTO.builder()
                 .token(fakeToken)
@@ -64,7 +64,7 @@ public class AuthService {
     }
 
     @Transactional
-    public UsuarioDetalleDTO crearUsuario(CrearUsuarioRequestDTO request) {
+    public UsuarioResponseDTO crearUsuario(CrearUsuarioRequestDTO request) {
         if (usuarioRepository.existsByDni(request.getDni())) {
             throw new BusinessRuleException("El DNI ya está registrado.");
         }
@@ -97,21 +97,21 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public List<UsuarioDetalleDTO> findAllUsuarios() {
+    public List<UsuarioResponseDTO> findAllUsuarios() {
         return usuarioRepository.findAll().stream()
                 .map(authMapper::toUsuarioDetalleDTO)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public UsuarioDetalleDTO buscarUsuarioPorId(Long id) {
+    public UsuarioResponseDTO buscarUsuarioPorId(Long id) {
         return usuarioRepository.findById(id)
                 .map(authMapper::toUsuarioDetalleDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
     }
 
     @Transactional
-    public UsuarioDetalleDTO actualizarUsuario(Long id, ActualizarUsuarioRequestDTO request) {
+    public UsuarioResponseDTO actualizarUsuario(Long id, ActualizarUsuarioRequestDTO request) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
@@ -176,10 +176,10 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public PerfilResponseDTO obtenerPerfilUsuarioLogueado(Long usuarioId) {
-        UsuarioDetalleDTO usuarioDto = buscarUsuarioPorId(usuarioId);
-        List<PrestamoDetalleDTO> prestamos = prestamoService.buscarPrestamosActivosPorUsuario(usuarioId);
-        List<ReservaDetalleDTO> reservas = reservaService.buscarReservasActivasPorUsuario(usuarioId);
-        List<MultaDTO> multas = multaService.buscarMultasPendientesPorUsuario(usuarioId);
+        UsuarioResponseDTO usuarioDto = buscarUsuarioPorId(usuarioId);
+        List<PrestamoResponseDTO> prestamos = prestamoService.buscarPrestamosActivosPorUsuario(usuarioId);
+        List<ReservaResponseDTO> reservas = reservaService.buscarReservasActivasPorUsuario(usuarioId);
+        List<MultaReponseDTO> multas = multaService.buscarMultasPendientesPorUsuario(usuarioId);
 
         return PerfilResponseDTO.builder()
                 .datosUsuario(usuarioDto)
@@ -190,7 +190,7 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public List<PrestamoDetalleDTO> getHistorialPrestamosUsuario(Long usuarioId) {
+    public List<PrestamoResponseDTO> getHistorialPrestamosUsuario(Long usuarioId) {
         return prestamoService.buscarHistorialPrestamosPorUsuario(usuarioId);
     }
 }

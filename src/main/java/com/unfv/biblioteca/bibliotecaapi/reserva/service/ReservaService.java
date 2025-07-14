@@ -8,7 +8,6 @@ import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.MaterialRepository;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.repository.PrestamoRepository;
 import com.unfv.biblioteca.bibliotecaapi.reserva.domain.Reserva;
 import com.unfv.biblioteca.bibliotecaapi.reserva.dto.request.CrearReservaRequestDTO;
-import com.unfv.biblioteca.bibliotecaapi.reserva.dto.response.ReservaDetalleDTO;
 import com.unfv.biblioteca.bibliotecaapi.reserva.dto.response.ReservaResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.reserva.mapper.ReservaMapper;
 import com.unfv.biblioteca.bibliotecaapi.reserva.repository.ReservaRepository;
@@ -84,10 +83,10 @@ public class ReservaService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservaDetalleDTO> buscarReservasActivasPorUsuario(Long usuarioId) {
+    public List<ReservaResponseDTO> buscarReservasActivasPorUsuario(Long usuarioId) {
         List<Reserva> reservas = reservaRepository.findByUsuarioIdAndEstado(usuarioId, "Activa");
         return reservas.stream()
-                .map(reservaMapper::toReservaDetalleDTO)
+                .map(reservaMapper::toDto)
                 .collect(Collectors.toList());
     }
 }

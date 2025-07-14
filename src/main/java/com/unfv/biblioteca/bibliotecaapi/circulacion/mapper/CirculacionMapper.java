@@ -4,8 +4,8 @@ import com.unfv.biblioteca.bibliotecaapi.autenticacion.mapper.AuthMapper;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.mapper.CatalogoMapper;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.domain.Multa;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.domain.Prestamo;
-import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.MultaDTO;
-import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.PrestamoDetalleDTO;
+import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.MultaReponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.PrestamoResponseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -18,13 +18,13 @@ public interface CirculacionMapper {
      * MapStruct reutilizará CatalogoMapper para convertir el Ejemplar
      * y UsuarioMapper para convertir el Usuario.
      */
-    PrestamoDetalleDTO toPrestamoDetalleDTO(Prestamo prestamo);
+    PrestamoResponseDTO toPrestamoDetalleDTO(Prestamo prestamo);
 
     /**
      * Convierte una entidad Multa a su DTO.
      * Mapeamos el ID del préstamo relacionado.
      */
     @Mapping(source = "prestamo.id", target = "prestamoId")
-    MultaDTO toMultaDTO(Multa multa);
+    MultaReponseDTO toMultaDTO(Multa multa);
 
 }

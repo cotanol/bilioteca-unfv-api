@@ -1,6 +1,6 @@
 package com.unfv.biblioteca.bibliotecaapi.circulacion.controller;
 
-import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.MultaDTO;
+import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.MultaReponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.service.MultaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +21,8 @@ public class MultaController {
      * URL: /api/multas?usuarioId=1
      */
     @GetMapping
-    public ResponseEntity<List<MultaDTO>> buscarMultasPendientesPorUsuario(@RequestParam Long usuarioId) {
-        List<MultaDTO> multas = multaService.buscarMultasPendientesPorUsuario(usuarioId);
+    public ResponseEntity<List<MultaReponseDTO>> buscarMultasPendientesPorUsuario(@RequestParam Long usuarioId) {
+        List<MultaReponseDTO> multas = multaService.buscarMultasPendientesPorUsuario(usuarioId);
         return ResponseEntity.ok(multas);
     }
 
@@ -32,8 +32,8 @@ public class MultaController {
      * URL: /api/multas/{id}/pago
      */
     @PutMapping("/{id}/pagar")
-    public ResponseEntity<MultaDTO> registrarPagoDeMulta(@PathVariable Long id) {
-        MultaDTO multaPagada = multaService.registrarPagoDeMulta(id);
+    public ResponseEntity<MultaReponseDTO> registrarPagoDeMulta(@PathVariable Long id) {
+        MultaReponseDTO multaPagada = multaService.registrarPagoDeMulta(id);
         return ResponseEntity.ok(multaPagada);
     }
 }
