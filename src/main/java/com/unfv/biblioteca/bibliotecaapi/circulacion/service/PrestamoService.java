@@ -50,6 +50,14 @@ public class PrestamoService {
     // Aquí irían los métodos para manejar la lógica de negocio de los préstamos
     // Por ejemplo: crear préstamo, devolver préstamo, calcular multas, etc.
 
+
+    @Transactional(readOnly = true)
+    public List<PrestamoResponseDTO> findAllPrestamos() {
+        return prestamoRepository.findAll().stream()
+                .map(circulacionMapper::toPrestamoDetalleDTO)
+                .collect(Collectors.toList());
+    }
+
     @Transactional(readOnly = true)
     public PrestamoResponseDTO buscarPrestamoPorId(Long id) {
         // 1. Buscamos la entidad en la base de datos

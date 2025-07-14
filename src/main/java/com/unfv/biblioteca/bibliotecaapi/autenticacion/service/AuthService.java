@@ -193,4 +193,26 @@ public class AuthService {
     public List<PrestamoResponseDTO> getHistorialPrestamosUsuario(Long usuarioId) {
         return prestamoService.buscarHistorialPrestamosPorUsuario(usuarioId);
     }
+
+    @Transactional
+    public void actualizarEstadoUsuario(Long id, String nuevoEstado) {
+        // 1. Buscar el usuario o lanzar un error si no existe
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + id));
+
+        // 2. Validar que el estado sea uno de los permitidos (opcional pero muy recomendado)
+        // Por ejemplo:
+        List<String> estadosValidos = List.of("Activo", "Suspendido", "Inactivo");
+        if (!estadosValidos.contains(nuevoEstado)) {
+            throw new BusinessRuleException("El estado '" + nuevoEstado + "' no es válido.");
+        }
+
+        // 3. Asignar el nuevo estado
+        usuario.setEstado(nuevoEstado);
+
+        // 4. Guardar los cambios en la base de datos
+        // Como el método es @Transactional, JPA/Hibernate guardará los cambios automáticamente
+        // al final de la transacción, pero un save() explícito también es correcto.
+        usuarioRepository.save(usuario);
+    }
 }

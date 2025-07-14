@@ -3,6 +3,7 @@ package com.unfv.biblioteca.bibliotecaapi.reserva.service;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.domain.Usuario;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.repository.UsuarioRepository;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Material;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.AutorResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.EjemplarRepository;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.MaterialRepository;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.repository.PrestamoRepository;
@@ -31,6 +32,13 @@ public class ReservaService {
     private final PrestamoRepository prestamoRepository;
     private final EjemplarRepository ejemplarRepository;
     private final ReservaMapper reservaMapper;
+
+    @Transactional(readOnly = true)
+    public List<ReservaResponseDTO> findAllReservas() {
+        return reservaRepository.findAll().stream()
+                .map(reservaMapper::toDto)
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     public ReservaResponseDTO crearReserva(CrearReservaRequestDTO request) {

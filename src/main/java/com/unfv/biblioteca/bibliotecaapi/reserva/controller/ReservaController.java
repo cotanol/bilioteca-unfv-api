@@ -1,5 +1,6 @@
 package com.unfv.biblioteca.bibliotecaapi.reserva.controller;
 
+import com.unfv.biblioteca.bibliotecaapi.catalogo.dto.response.AutorResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.reserva.dto.request.CrearReservaRequestDTO;
 import com.unfv.biblioteca.bibliotecaapi.reserva.dto.response.ReservaResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.reserva.service.ReservaService;
@@ -9,12 +10,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/reservas")
 @RequiredArgsConstructor
 public class ReservaController {
 
     private final ReservaService reservaService;
+
+    @GetMapping
+    public ResponseEntity<List<ReservaResponseDTO>> listarReservas() {
+        return ResponseEntity.ok(reservaService.findAllReservas());
+    }
 
     @PostMapping
     public ResponseEntity<ReservaResponseDTO> crearReserva(@Valid @RequestBody CrearReservaRequestDTO request) {

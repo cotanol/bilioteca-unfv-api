@@ -13,4 +13,6 @@ public interface ReservaMapper {
     @Mapping(source = "usuario.id", target = "usuarioId")
     @Mapping(source = "usuario.nombres", target = "usuarioNombre")
     ReservaResponseDTO toDto(Reserva reserva);
+
+
 }

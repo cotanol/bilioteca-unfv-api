@@ -1,6 +1,7 @@
 package com.unfv.biblioteca.bibliotecaapi.circulacion.controller;
 
 import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.request.CrearPrestamoRequestDTO;
+import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.MultaReponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.PrestamoResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.service.PrestamoService;
 import jakarta.validation.Valid;
@@ -9,12 +10,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/prestamos")
 @RequiredArgsConstructor
 public class PrestamoController {
 
     private final PrestamoService prestamoService;
+
+    @GetMapping
+    public ResponseEntity<List<PrestamoResponseDTO>> listarPrestamos() {
+        return ResponseEntity.ok(prestamoService.findAllPrestamos());
+    }
 
     @PostMapping
     public ResponseEntity<PrestamoResponseDTO> crearPrestamo(@Valid @RequestBody CrearPrestamoRequestDTO request) {
@@ -39,4 +47,5 @@ public class PrestamoController {
         PrestamoResponseDTO prestamoRenovado = prestamoService.renovarPrestamo(id);
         return ResponseEntity.ok(prestamoRenovado);
     }
+
 }

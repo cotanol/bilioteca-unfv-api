@@ -3,6 +3,7 @@ package com.unfv.biblioteca.bibliotecaapi.circulacion.service;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.domain.Multa;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.domain.Prestamo;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.MultaReponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.PrestamoResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.mapper.CirculacionMapper;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.repository.MultaRepository;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.repository.PrestamoRepository;
@@ -36,6 +37,15 @@ public class MultaService {
 
     // Definimos la tasa de la multa como una constante
     private static final BigDecimal TASA_DIARIA_MULTA = new BigDecimal("1.00"); // S/ 1.00 por día
+
+    @Transactional(readOnly = true)
+    public List<MultaReponseDTO> findAllMultas() {
+        return multaRepository.findAll().stream()
+                .map(circulacionMapper::toMultaDTO)
+                .collect(Collectors.toList());
+    }
+
+
 
     @Transactional
     public MultaReponseDTO generarMultaParaPrestamo(Prestamo prestamo) {

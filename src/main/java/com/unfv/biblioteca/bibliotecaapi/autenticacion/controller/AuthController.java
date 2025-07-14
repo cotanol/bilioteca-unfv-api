@@ -1,12 +1,8 @@
 
 package com.unfv.biblioteca.bibliotecaapi.autenticacion.controller;
 
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.ActualizarUsuarioRequestDTO;
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.CrearUsuarioRequestDTO;
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.LoginRequestDTO;
+import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.*;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.AuthResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.ActualizarTipoUsuarioRequestDTO;
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.CrearTipoUsuarioRequestDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.PerfilResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.TipoUsuarioResponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.UsuarioResponseDTO;
@@ -95,5 +91,11 @@ public class AuthController {
     @GetMapping("/perfil/historial/{id}")
     public ResponseEntity<List<PrestamoResponseDTO>> obtenerHistorialPrestamos(@PathVariable Long id) {
         return ResponseEntity.ok(authService.getHistorialPrestamosUsuario(id));
+    }
+
+    @PatchMapping("/usuarios/{id}/estado")
+    public ResponseEntity<Void> actualizarEstadoUsuario(@PathVariable Long id, @Valid @RequestBody ActualizarEstadoUsuarioRequestDTO request) {
+        authService.actualizarEstadoUsuario(id, request.getEstado());
+        return ResponseEntity.noContent().build(); // Retorna 204 No Content, ideal para actualizaciones parciales
     }
 }
