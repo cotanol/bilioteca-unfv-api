@@ -1,5 +1,6 @@
 package com.unfv.biblioteca.bibliotecaapi.reserva.dto.response;
 
+import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.UsuarioResponseDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,4 +17,5 @@ public class ReservaResponseDTO {
     private String usuarioNombre;
     private LocalDateTime fechaReserva;
     private String estado;
+    private UsuarioResponseDTO usuario;
 }

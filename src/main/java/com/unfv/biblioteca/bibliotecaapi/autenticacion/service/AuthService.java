@@ -6,20 +6,21 @@ import com.unfv.biblioteca.bibliotecaapi.autenticacion.domain.Usuario;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.ActualizarUsuarioRequestDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.CrearUsuarioRequestDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.LoginRequestDTO;
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.AuthResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.PerfilResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.UsuarioResponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.*;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.mapper.AuthMapper;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.repository.TipoUsuarioRepository;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.repository.UsuarioRepository;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.ActualizarTipoUsuarioRequestDTO;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.CrearTipoUsuarioRequestDTO;
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.TipoUsuarioResponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.repository.*;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.MultaReponseDTO;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.PrestamoResponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.circulacion.repository.MultaRepository;
+import com.unfv.biblioteca.bibliotecaapi.circulacion.repository.PrestamoRepository;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.service.MultaService;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.service.PrestamoService;
 import com.unfv.biblioteca.bibliotecaapi.reserva.dto.response.ReservaResponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.reserva.repository.ReservaRepository;
 import com.unfv.biblioteca.bibliotecaapi.reserva.service.ReservaService;
 import com.unfv.biblioteca.bibliotecaapi.shared.exception.BusinessRuleException;
 import com.unfv.biblioteca.bibliotecaapi.shared.exception.ResourceNotFoundException;
@@ -41,6 +42,15 @@ public class AuthService {
     private final PrestamoService prestamoService;
     private final MultaService multaService;
     private final ReservaService reservaService;
+    private final AutorRepository autorRepository;
+    private final CategoriaRepository categoriaRepository;
+    private final MaterialRepository materialRepository;
+    private final UbicacionRepository ubicacionRepository;
+    private final EditorialRepository editorialRepository;
+    private final EjemplarRepository ejemplarRepository;
+    private final PrestamoRepository prestamoRepository;
+    private final MultaRepository multaRepository;
+    private final ReservaRepository reservaRepository;
 
     // Métodos para Usuario
     @Transactional
@@ -214,5 +224,22 @@ public class AuthService {
         // Como el método es @Transactional, JPA/Hibernate guardará los cambios automáticamente
         // al final de la transacción, pero un save() explícito también es correcto.
         usuarioRepository.save(usuario);
+    }
+
+    @Transactional(readOnly = true) // Buena práctica para operaciones de solo lectura
+    public DashboardStatsDTO getDashboardStats() {
+        // Usamos el patrón Builder del DTO para construir la respuesta
+        return DashboardStatsDTO.builder()
+                .cantidadAutores(autorRepository.count())
+                .cantidadCategorias(categoriaRepository.count())
+                .cantidadEditoriales(editorialRepository.count())
+                .cantidadMateriales(materialRepository.count())
+                .cantidadUbicaciones(ubicacionRepository.count())
+                .cantidadEjemplares(ejemplarRepository.count())
+                .cantidadUsuarios(usuarioRepository.count())
+                .cantidadPrestamos(prestamoRepository.count())
+                .cantidadMultas(multaRepository.count())
+                .cantidadReservas(reservaRepository.count())
+                .build();
     }
 }

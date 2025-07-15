@@ -1,5 +1,6 @@
 package com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response;
 
+import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.UsuarioResponseDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,4 +17,5 @@ public class MultaReponseDTO {
     private LocalDate fechaGeneracion;
     private String estado;
     private LocalDate fechaPago;
+    private UsuarioResponseDTO usuario;
 }

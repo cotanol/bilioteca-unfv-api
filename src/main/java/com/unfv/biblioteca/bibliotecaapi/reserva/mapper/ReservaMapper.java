@@ -1,11 +1,13 @@
 package com.unfv.biblioteca.bibliotecaapi.reserva.mapper;
 
+import com.unfv.biblioteca.bibliotecaapi.autenticacion.mapper.AuthMapper;
+
 import com.unfv.biblioteca.bibliotecaapi.reserva.domain.Reserva;
 import com.unfv.biblioteca.bibliotecaapi.reserva.dto.response.ReservaResponseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {AuthMapper.class})
 public interface ReservaMapper {
 
     @Mapping(source = "material.id", target = "materialId")

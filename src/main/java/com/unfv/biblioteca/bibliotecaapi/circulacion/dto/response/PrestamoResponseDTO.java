@@ -1,5 +1,6 @@
 package com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response;
 
+import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.UsuarioResponseDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,4 +19,5 @@ public class PrestamoResponseDTO {
     private LocalDateTime fechaDevolucionReal;
     private String estado;
     private Integer renovaciones;
+    private UsuarioResponseDTO usuario;
 }

@@ -2,10 +2,7 @@
 package com.unfv.biblioteca.bibliotecaapi.autenticacion.controller;
 
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.request.*;
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.AuthResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.PerfilResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.TipoUsuarioResponseDTO;
-import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.UsuarioResponseDTO;
+import com.unfv.biblioteca.bibliotecaapi.autenticacion.dto.response.*;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.service.AuthService;
 import com.unfv.biblioteca.bibliotecaapi.circulacion.dto.response.PrestamoResponseDTO;
 import jakarta.validation.Valid;
@@ -37,6 +34,11 @@ public class AuthController {
     @GetMapping("/usuarios")
     public ResponseEntity<List<UsuarioResponseDTO>> listarUsuarios() {
         return ResponseEntity.ok(authService.findAllUsuarios());
+    }
+
+    @GetMapping("/admin/dashboard")
+    public ResponseEntity<DashboardStatsDTO> obtenerEstadisticasDashboard() {
+        return ResponseEntity.ok(authService.getDashboardStats());
     }
 
     @GetMapping("/usuarios/{id}")
@@ -98,4 +100,6 @@ public class AuthController {
         authService.actualizarEstadoUsuario(id, request.getEstado());
         return ResponseEntity.noContent().build(); // Retorna 204 No Content, ideal para actualizaciones parciales
     }
+
+
 }
