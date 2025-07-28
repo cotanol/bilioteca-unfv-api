@@ -15,4 +15,8 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     Optional<Reserva> findFirstByMaterialIdAndEstadoOrderByFechaReservaAsc(Long materialId, String estado);
 
     List<Reserva> findByUsuarioIdAndEstado(Long usuarioId, String estado);
+
+    boolean existsByUsuarioIdAndMaterialIdAndEstadoIn(Long usuarioId, Long materialId, List<String> estados);
+
+    Optional<Reserva> findByUsuarioIdAndEjemplarIdAndEstado(Long usuarioId, Long ejemplarId, String estado);
 }

@@ -129,4 +129,6 @@ public interface CatalogoMapper {
         }
         return categorias.stream().map(Categoria::getNombreCategoria).collect(Collectors.toSet());
     }
+
+
 }

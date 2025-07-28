@@ -2,6 +2,7 @@ package com.unfv.biblioteca.bibliotecaapi.reserva.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.unfv.biblioteca.bibliotecaapi.autenticacion.domain.Usuario;
+import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Ejemplar;
 import com.unfv.biblioteca.bibliotecaapi.catalogo.domain.Material;
 import jakarta.persistence.*;
 import lombok.*;
@@ -41,6 +42,11 @@ public class Reserva {
     @JoinColumn(name = "usuario_id", nullable = false)
     @JsonIgnore
     private Usuario usuario;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ejemplar_id", nullable = true)
+    @JsonIgnore
+    private Ejemplar ejemplar;
 
     @Column(name = "fecha_reserva", nullable = false)
     private LocalDateTime fechaReserva;

@@ -18,6 +18,8 @@ public interface CirculacionMapper {
      * MapStruct reutilizará CatalogoMapper para convertir el Ejemplar
      * y UsuarioMapper para convertir el Usuario.
      */
+    @Mapping(source = "ejemplar.codigoBarras", target = "codigoBarrasEjemplar")
+    @Mapping(source = "ejemplar.material.titulo", target = "tituloMaterial")
     PrestamoResponseDTO toPrestamoDetalleDTO(Prestamo prestamo);
 
     /**
@@ -25,6 +27,7 @@ public interface CirculacionMapper {
      * Mapeamos el ID del préstamo relacionado.
      */
     @Mapping(source = "prestamo.id", target = "prestamoId")
+    @Mapping(source = "prestamo.usuario", target = "usuario")
     MultaReponseDTO toMultaDTO(Multa multa);
 
 }

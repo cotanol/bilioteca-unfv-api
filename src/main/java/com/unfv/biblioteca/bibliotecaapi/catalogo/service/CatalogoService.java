@@ -359,4 +359,11 @@ public class CatalogoService {
         // Aquí se podrían agregar reglas de negocio, como no poder eliminar si está en préstamo.
         ejemplarRepository.deleteById(id);
     }
+
+    @Transactional(readOnly = true)
+    public List<EjemplarResponseDTO> findEjemplaresByMaterialId(Long materialId) {
+        return ejemplarRepository.findByMaterialId(materialId).stream()
+                .map(catalogoMapper::toEjemplarResponseDTO)
+                .collect(Collectors.toList());
+    }
 }

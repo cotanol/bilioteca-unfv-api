@@ -210,4 +210,10 @@ public class CatalogoController {
         catalogoService.eliminarEjemplar(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/materiales/{id}/ejemplares")
+    public ResponseEntity<List<EjemplarResponseDTO>> listarEjemplaresPorMaterial(@PathVariable Long id) {
+        List<EjemplarResponseDTO> ejemplares = catalogoService.findEjemplaresByMaterialId(id);
+        return ResponseEntity.ok(ejemplares);
+    }
 }

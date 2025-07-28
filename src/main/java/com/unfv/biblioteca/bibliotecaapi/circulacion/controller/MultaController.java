@@ -19,20 +19,21 @@ public class MultaController {
     private final MultaService multaService;
 
     @GetMapping
-    public ResponseEntity<List<MultaReponseDTO>> listarMultas() {
-        return ResponseEntity.ok(multaService.findAllMultas());
-    }
+    public ResponseEntity<List<MultaReponseDTO>> listarOFiltrarMultas(
+            @RequestParam(required = false) Long usuarioId) {
 
-    /**
-     * Endpoint para buscar las multas pendientes de un usuario.
-     * HTTP Method: GET
-     * URL: /api/multas?usuarioId=1
-     */
-//    @GetMapping
-//    public ResponseEntity<List<MultaReponseDTO>> buscarMultasPendientesPorUsuario(@RequestParam Long usuarioId) {
-//        List<MultaReponseDTO> multas = multaService.buscarMultasPendientesPorUsuario(usuarioId);
-//        return ResponseEntity.ok(multas);
-//    }
+        List<MultaReponseDTO> multas;
+
+        if (usuarioId != null) {
+            // Si se provee el usuarioId, se buscan sus multas pendientes.
+            multas = multaService.buscarMultasPendientesPorUsuario(usuarioId);
+        } else {
+            // Si no, se listan todas las multas del sistema.
+            multas = multaService.findAllMultas();
+        }
+
+        return ResponseEntity.ok(multas);
+    }
 
     /**
      * Endpoint de ACCIÓN para registrar el pago de una multa.
