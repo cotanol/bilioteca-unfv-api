@@ -21,4 +21,6 @@ public interface EjemplarRepository extends JpaRepository<Ejemplar, Long> {
     Optional<Ejemplar> findFirstByMaterialIdAndEstado(Long materialId, String estado);
 
     List<Ejemplar> findByMaterialId(Long materialId);
+
+    Optional<Ejemplar> findByCodigoBarras(String codigoBarras);
 }

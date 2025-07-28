@@ -34,10 +34,10 @@ public class PrestamoService {
 
     @Transactional
     public PrestamoResponseDTO crearPrestamo(CrearPrestamoRequestDTO request) {
-        Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + request.getUsuarioId()));
-        Ejemplar ejemplar = exemplarRepository.findById(request.getEjemplarId())
-                .orElseThrow(() -> new ResourceNotFoundException("Ejemplar no encontrado con ID: " + request.getEjemplarId()));
+        Usuario usuario = usuarioRepository.findByCodigoUniversitario(request.getCodigoUniversitario())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con código universitario: " + request.getCodigoUniversitario()));
+        Ejemplar ejemplar = exemplarRepository.findByCodigoBarras(request.getCodigoBarras())
+                .orElseThrow(() -> new ResourceNotFoundException("Ejemplar no encontrado con código de barras: " + request.getCodigoBarras()));
 
         validarCondicionesDePrestamo(usuario);
         vincularConReservaSiExiste(usuario, ejemplar);
